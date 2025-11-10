@@ -36,105 +36,105 @@
 #### Request (HTTP запрос)
 ```go
 type Request struct {
-    Method  string            // HTTP метод (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
-    URL     string            // Полный URL с поддержкой переменных {{variable}}
-    Headers map[string]string // Заголовки запроса
-    Body    *RequestBody      // Тело запроса
-    Auth    *Auth             // Настройки аутентификации
-    Timeout *Timeout          // Таймауты подключения и чтения
-    Cookies *CookieSettings   // Настройки управления cookies
+    Method  string            `json:"method"`
+    URL     string            `json:"url"`
+    Headers map[string]string `json:"headers,omitempty"`
+    Body    *RequestBody      `json:"body,omitempty"`
+    Auth    *Auth             `json:"auth,omitempty"`
+    Timeout *Timeout          `json:"timeout,omitempty"`
+    Cookies *CookieSettings   `json:"cookies,omitempty"`
 }
 
 type RequestBody struct {
-    Type        string // "json", "xml", "raw", "binary"
-    Content     []byte // Содержимое тела
-    ContentType string // MIME тип (опционально, определяется автоматически)
+    Type        string `json:"type"`
+    Content     []byte `json:"content"`
+    ContentType string `json:"content_type,omitempty"`
 }
 
 type Auth struct {
-    Type     string // "basic", "bearer", "apikey"
-    Username string // Для Basic Auth
-    Password string // Для Basic Auth
-    Token    string // Для Bearer Token
-    APIKey   string // Для API Key
-    KeyName  string // Имя ключа для API Key
-    Location string // "header", "query" - для API Key
+    Type     string `json:"type"`
+    Username string `json:"username,omitempty"`
+    Password string `json:"password,omitempty"`
+    Token    string `json:"token,omitempty"`
+    APIKey   string `json:"api_key,omitempty"`
+    KeyName  string `json:"key_name,omitempty"`
+    Location string `json:"location,omitempty"`
 }
 
 type Timeout struct {
-    Connect time.Duration // Таймаут подключения
-    Read    time.Duration // Таймаут чтения
+    Connect time.Duration `json:"connect"`
+    Read    time.Duration `json:"read"`
 }
 
 type CookieSettings struct {
-    AutoManage bool // Автоматическое управление cookies
+    AutoManage bool `json:"auto_manage"`
 }
 ```
 
 #### Response (HTTP ответ)
 ```go
 type Response struct {
-    StatusCode int               // HTTP код статуса
-    Status     string            // Текст статуса (например, "200 OK")
-    Headers    map[string][]string // Заголовки ответа
-    Body       []byte            // Тело ответа (raw bytes)
-    Duration   time.Duration     // Время выполнения запроса
-    Size       int64             // Размер ответа в байтах
+    StatusCode int               `json:"status_code"`
+    Status     string            `json:"status"`
+    Headers    map[string][]string `json:"headers"`
+    Body       []byte            `json:"body"`
+    Duration   time.Duration     `json:"duration"`
+    Size       int64             `json:"size"`
 }
 ```
 
 #### Environment (Окружение)
 ```go
 type Environment struct {
-    Name      string            // Уникальное имя окружения
-    Variables map[string]string // Переменные (ключ-значение, все строки)
+    Name      string            `json:"name"`
+    Variables map[string]string `json:"variables"`
 }
 ```
 
 #### Collection (Коллекция)
 ```go
 type Collection struct {
-    Name        string         // Уникальное имя коллекции
-    Description string         // Описание коллекции
-    Items       []*RequestItem // Массив запросов (плоский список)
+    Name        string         `json:"name"`
+    Description string         `json:"description,omitempty"`
+    Items       []*RequestItem `json:"items"`
 }
 
 type RequestItem struct {
-    Name    string   // Имя запроса
-    Request *Request // HTTP запрос
+    Name    string   `json:"name"`
+    Request *Request `json:"request"`
 }
 ```
 
 #### RequestExecution (Результат выполнения запроса)
 ```go
 type RequestExecution struct {
-    Request  *Request   // Выполненный запрос
-    Response *Response  // Ответ сервера (nil при ошибке)
-    Error    error      // Ошибка выполнения (nil при успехе)
-    Duration time.Duration // Время выполнения
-    Timestamp time.Time    // Время выполнения
+    Request   *Request      `json:"request"`
+    Response  *Response     `json:"response,omitempty"`
+    Error     string        `json:"error,omitempty"`
+    Duration  time.Duration `json:"duration"`
+    Timestamp time.Time     `json:"timestamp"`
 }
 ```
 
 #### ExecutionResult (Результат выполнения коллекции)
 ```go
 type ExecutionResult struct {
-    CollectionName string              // Имя выполненной коллекции
-    Environment    string              // Использованное окружение
-    StartTime      time.Time           // Время начала выполнения
-    EndTime        time.Time           // Время окончания выполнения
-    TotalDuration  time.Duration       // Общее время выполнения
-    Requests       []*RequestExecution // Результаты выполнения запросов
-    Statistics     *Statistics         // Статистика выполнения
+    CollectionName string              `json:"collection_name"`
+    Environment    string              `json:"environment"`
+    StartTime      time.Time           `json:"start_time"`
+    EndTime        time.Time           `json:"end_time"`
+    TotalDuration  time.Duration       `json:"total_duration"`
+    Requests       []*RequestExecution `json:"requests"`
+    Statistics     *Statistics         `json:"statistics"`
 }
 
 type Statistics struct {
-    Total    int           // Общее количество запросов
-    Success  int           // Количество успешных запросов
-    Failed   int           // Количество неудачных запросов
-    AvgTime  time.Duration // Среднее время выполнения
-    MinTime  time.Duration // Минимальное время выполнения
-    MaxTime  time.Duration // Максимальное время выполнения
+    Total    int           `json:"total"`
+    Success  int           `json:"success"`
+    Failed   int           `json:"failed"`
+    AvgTime  time.Duration `json:"avg_time"`
+    MinTime  time.Duration `json:"min_time"`
+    MaxTime  time.Duration `json:"max_time"`
 }
 ```
 
@@ -271,38 +271,38 @@ type Storage struct {
 }
 
 type Config struct {
-    Storage  StorageConfig
-    Defaults DefaultsConfig
-    Logging  LoggingConfig
+    Storage  StorageConfig  `yaml:"storage"`
+    Defaults DefaultsConfig `yaml:"defaults"`
+    Logging  LoggingConfig  `yaml:"logging"`
 }
 
 type StorageConfig struct {
-    BasePath string
+    BasePath string `yaml:"base_path"`
 }
 
 type DefaultsConfig struct {
-    Timeout TimeoutConfig
-    Cookies CookiesConfig
+    Timeout TimeoutConfig `yaml:"timeout"`
+    Cookies CookiesConfig `yaml:"cookies"`
 }
 
 type TimeoutConfig struct {
-    Connect time.Duration
-    Read    time.Duration
+    Connect time.Duration `yaml:"connect"`
+    Read    time.Duration `yaml:"read"`
 }
 
 type CookiesConfig struct {
-    AutoManage bool
+    AutoManage bool `yaml:"auto_manage"`
 }
 
 type LoggingConfig struct {
-    Level  string
-    Format string
+    Level  string `yaml:"level"`
+    Format string `yaml:"format"`
 }
 
 type LogEntry struct {
-    Time    time.Time
-    Level   string
-    Message string
+    Time    time.Time `json:"time"`
+    Level   string    `json:"level"`
+    Message string    `json:"message"`
 }
 ```
 
