@@ -1,24 +1,8 @@
 # Детализированная спецификация библиотеки getman
 
-## 1. Анализ требований на логические ошибки и несогласованности
+## 1. Архитектура библиотеки
 
-### Найденные проблемы и их решения:
-
-#### 1.1. Противоречие в формате конфигурационного файла
-- **Проблема**: В строке 53 указан `config.json`, а в строке 65 указан YAML формат
-- **Решение**: Использовать YAML формат для конфигурации (`config.yaml`), так как это более гибкий формат для настроек
-
-#### 1.2. Неясность структуры временных директорий
-- **Проблема**: В строках 56-59 описана структура, но не указано, создается ли поддиректория для каждого запуска или файлы перезаписываются
-- **Решение**: Создавать уникальную поддиректорию для каждого запуска с форматом `{timestamp}-{uuid}` в `/tmp/.getman/`, внутри которой будут файлы `logs.json` и `history.json`
-
-#### 1.3. Формат файлов логов и истории
-- **Проблема**: В строке 57 указан формат `day_month_year_hour_minutes_seconds`, но не указано, что делать с файлами предыдущих запусков
-- **Решение**: Хранить только последний запуск в `/tmp/.getman/logs/` и `/tmp/.getman/history/`, перезаписывая файлы при новом запуске. Или хранить все запуски с уникальными именами файлов
-
-## 2. Архитектура библиотеки
-
-### 2.1. Компоненты
+### 1.1. Компоненты
 
 Библиотека состоит из следующих основных компонентов:
 
@@ -47,7 +31,7 @@
    - ResponseFormatter - форматирование ответов
    - ResultFormatter - форматирование результатов выполнения
 
-### 2.2. Структура данных
+### 1.2. Структура данных
 
 #### Request (HTTP запрос)
 ```go
@@ -154,9 +138,9 @@ type Statistics struct {
 }
 ```
 
-## 3. Система переменных
+## 2. Система переменных
 
-### 3.1. Области видимости
+### 2.1. Области видимости
 
 1. **Environment (окружение)** - приоритет выше
    - Загружается из JSON файла в `~/.getman/environments/{name}.json`
@@ -166,7 +150,7 @@ type Statistics struct {
    - Используется, если не загружено другое окружение
    - Устанавливается через `SetGlobalVariable()`
 
-### 3.2. Правила подстановки
+### 2.2. Правила подстановки
 
 - **Синтаксис**: `{{variable}}`
 - **Подстановка**: Происходит во всех частях запроса:
@@ -177,7 +161,7 @@ type Statistics struct {
 - **Приоритет**: При конфликте имен переменная из активного окружения перезаписывает глобальную
 - **Типы**: Все переменные - строки
 
-### 3.3. Примеры использования переменных
+### 2.3. Примеры использования переменных
 
 ```
 URL: {{baseUrl}}/users/{{userId}}?token={{apiToken}}
@@ -185,9 +169,9 @@ Header: Authorization: Bearer {{token}}
 Body: {"name": "{{userName}}", "email": "{{userEmail}}"}
 ```
 
-## 4. Структура директорий и файлов
+## 3. Структура директорий и файлов
 
-### 4.1. Постоянное хранилище (~/.getman/)
+### 3.1. Постоянное хранилище (~/.getman/)
 
 ```
 ~/.getman/
@@ -195,22 +179,16 @@ Body: {"name": "{{userName}}", "email": "{{userEmail}}"}
 │   └── {name}.json
 ├── environments/         # JSON файлы окружений
 │   └── {name}.json
-└── config.yaml          # Конфигурация библиотеки
-```
-
-### 4.2. Временное хранилище (/tmp/.getman/)
-
-```
-/tmp/.getman/
+├── history/              # История выполнения запросов
+│   └── {timestamp}.json  # Файлы истории с временными метками
 ├── logs/                 # Логи выполнения
-│   └── {timestamp}.json  # Последний запуск (перезаписывается)
-└── history/              # История выполнения
-    └── {timestamp}.json  # Последний запуск (перезаписывается)
+│   └── {timestamp}.json  # Файлы логов с временными метками
+└── config.yaml          # Конфигурация библиотеки
 ```
 
 **Формат timestamp**: `DD_MM_YY_HH_MM_SS` (например: `01_12_25_22_55_39`)
 
-### 4.3. Форматы файлов
+### 3.2. Форматы файлов
 
 #### Environment JSON
 ```json
@@ -255,7 +233,6 @@ Body: {"name": "{{userName}}", "email": "{{userEmail}}"}
 ```yaml
 storage:
   base_path: ~/.getman
-  temp_path: /tmp/.getman
 
 defaults:
   timeout:
@@ -267,80 +244,17 @@ defaults:
 logging:
   level: info
   format: text
-  save_to_file: true
-
-history:
-  save_to_file: true
-  max_entries: 100
 ```
 
-#### Logs JSON
-```json
-{
-  "timestamp": "2025-12-01T22:55:39Z",
-  "collection": "My Collection",
-  "environment": "production",
-  "entries": [
-    {
-      "time": "2025-12-01T22:55:40Z",
-      "level": "info",
-      "message": "Executing request: Get Users"
-    },
-    {
-      "time": "2025-12-01T22:55:41Z",
-      "level": "info",
-      "message": "Request completed: 200 OK"
-    }
-  ]
-}
-```
+## 4. API библиотеки
 
-#### History JSON
-```json
-{
-  "timestamp": "2025-12-01T22:55:39Z",
-  "collection": "My Collection",
-  "environment": "production",
-  "executions": [
-    {
-      "request": {
-        "method": "GET",
-        "url": "https://api.example.com/users",
-        "headers": {}
-      },
-      "response": {
-        "status_code": 200,
-        "status": "200 OK",
-        "headers": {
-          "Content-Type": ["application/json"]
-        },
-        "body": "[{\"id\":1,\"name\":\"John\"}]",
-        "duration": "150ms",
-        "size": 25
-      },
-      "error": null,
-      "timestamp": "2025-12-01T22:55:40Z"
-    }
-  ],
-  "statistics": {
-    "total": 1,
-    "success": 1,
-    "failed": 0,
-    "avg_time": "150ms",
-    "min_time": "150ms",
-    "max_time": "150ms"
-  }
-}
-```
-
-## 5. API библиотеки
-
-### 5.1. Основные типы
+### 4.1. Основные типы
 
 ```go
 package getman
 
 import (
+    "net/http"
     "time"
 )
 
@@ -354,18 +268,45 @@ type Client struct {
 
 type Storage struct {
     basePath string
-    tempPath string
 }
 
 type Config struct {
-    Storage StorageConfig
+    Storage  StorageConfig
     Defaults DefaultsConfig
-    Logging LoggingConfig
-    History HistoryConfig
+    Logging  LoggingConfig
+}
+
+type StorageConfig struct {
+    BasePath string
+}
+
+type DefaultsConfig struct {
+    Timeout TimeoutConfig
+    Cookies CookiesConfig
+}
+
+type TimeoutConfig struct {
+    Connect time.Duration
+    Read    time.Duration
+}
+
+type CookiesConfig struct {
+    AutoManage bool
+}
+
+type LoggingConfig struct {
+    Level  string
+    Format string
+}
+
+type LogEntry struct {
+    Time    time.Time
+    Level   string
+    Message string
 }
 ```
 
-### 5.2. Инициализация
+### 4.2. Инициализация
 
 ```go
 // NewClient создает новый клиент с базовым путем
@@ -374,11 +315,11 @@ func NewClient(basePath string) (*Client, error)
 // NewClientWithConfig создает новый клиент с конфигурацией из файла
 func NewClientWithConfig(configPath string) (*Client, error)
 
-// NewClientWithDefaults создает клиент с путями по умолчанию (~/.getman)
+// NewClientWithDefaults создает клиента с путями по умолчанию (~/.getman)
 func NewClientWithDefaults() (*Client, error)
 ```
 
-### 5.3. Управление окружениями
+### 4.3. Управление окружениями
 
 ```go
 // LoadEnvironment загружает окружение по имени
@@ -409,7 +350,7 @@ func (c *Client) GetVariable(key string) (string, bool)
 func (c *Client) ResolveVariables(template string) (string, error)
 ```
 
-### 5.4. Управление коллекциями
+### 4.4. Управление коллекциями
 
 ```go
 // LoadCollection загружает коллекцию по имени
@@ -431,7 +372,7 @@ func (c *Client) ImportFromPostman(filePath string) (*Collection, error)
 func (c *Client) ExportToPostman(collection *Collection, filePath string) error
 ```
 
-### 5.5. Построение запросов (Fluent API)
+### 4.5. Построение запросов (Fluent API)
 
 ```go
 // NewRequestBuilder создает новый построитель запросов
@@ -491,7 +432,7 @@ func (b *RequestBuilder) CookiesAutoManage(autoManage bool) *RequestBuilder
 func (b *RequestBuilder) Build() (*Request, error)
 ```
 
-### 5.6. Выполнение запросов
+### 4.6. Выполнение запросов
 
 ```go
 // ExecuteRequest выполняет один HTTP запрос
@@ -507,29 +448,34 @@ func (c *Client) ExecuteCollectionSelective(collectionName string, itemNames []s
 func (c *Client) ValidateRequest(req *Request) error
 ```
 
-### 5.7. История и логирование
+### 4.7. История и логирование
 
 ```go
-// GetHistory возвращает историю выполнения запросов
+// GetHistory возвращает историю выполнения запросов из постоянного хранилища
+// Читает файлы из ~/.getman/history/ и возвращает последние limit записей
 func (c *Client) GetHistory(limit int) ([]*RequestExecution, error)
 
-// GetLastExecution возвращает результат последнего выполнения
+// GetLastExecution возвращает результат последнего выполнения из постоянного хранилища
+// Читает последний файл из ~/.getman/history/
 func (c *Client) GetLastExecution() (*ExecutionResult, error)
 
-// GetLogs возвращает логи последнего выполнения
+// GetLogs возвращает логи последнего выполнения из постоянного хранилища
+// Читает последний файл из ~/.getman/logs/
 func (c *Client) GetLogs() ([]byte, error)
 
-// ClearHistory очищает историю выполнения
+// ClearHistory очищает историю выполнения (удаляет все файлы из ~/.getman/history/)
 func (c *Client) ClearHistory() error
 
-// SaveHistory сохраняет историю в файл
+// SaveHistory сохраняет историю в файл в постоянном хранилище
+// Создает файл с timestamp в имени: ~/.getman/history/{timestamp}.json
 func (c *Client) SaveHistory(result *ExecutionResult) error
 
-// SaveLogs сохраняет логи в файл
+// SaveLogs сохраняет логи в файл в постоянном хранилище
+// Создает файл с timestamp в имени: ~/.getman/logs/{timestamp}.json
 func (c *Client) SaveLogs(logs []LogEntry) error
 ```
 
-### 5.8. Визуализация и форматирование
+### 4.8. Визуализация и форматирование
 
 ```go
 // FormatResponse форматирует ответ в читаемый текст
@@ -557,7 +503,7 @@ func PrintExecutionResult(result *ExecutionResult)
 func PrintStatistics(stats *Statistics)
 ```
 
-### 5.9. Конфигурация
+### 4.9. Конфигурация
 
 ```go
 // LoadConfig загружает конфигурацию из файла
@@ -576,9 +522,9 @@ func (c *Client) GetConfig() *Config
 func (c *Client) UpdateConfig(config *Config) error
 ```
 
-## 6. Примеры использования
+## 5. Примеры использования
 
-### 6.1. Базовое использование
+### 5.1. Базовое использование
 
 ```go
 package main
@@ -625,7 +571,7 @@ func main() {
 }
 ```
 
-### 6.2. Работа с коллекциями
+### 5.2. Работа с коллекциями
 
 ```go
 func main() {
@@ -650,7 +596,7 @@ func main() {
 }
 ```
 
-### 6.3. Выборочное выполнение запросов
+### 5.3. Выборочное выполнение запросов
 
 ```go
 func main() {
@@ -674,7 +620,7 @@ func main() {
 }
 ```
 
-### 6.4. Импорт из Postman
+### 5.4. Импорт из Postman
 
 ```go
 func main() {
@@ -697,7 +643,7 @@ func main() {
 }
 ```
 
-### 6.5. Создание окружения
+### 5.5. Создание окружения
 
 ```go
 func main() {
@@ -724,7 +670,7 @@ func main() {
 }
 ```
 
-### 6.6. Работа с переменными
+### 5.6. Работа с переменными
 
 ```go
 func main() {
@@ -753,7 +699,7 @@ func main() {
 }
 ```
 
-### 6.7. Получение истории
+### 5.7. Получение истории
 
 ```go
 func main() {
@@ -779,9 +725,9 @@ func main() {
 }
 ```
 
-## 7. Обработка ошибок
+## 6. Обработка ошибок
 
-### 7.1. Типы ошибок
+### 6.1. Типы ошибок
 
 ```go
 var (
@@ -795,7 +741,7 @@ var (
 )
 ```
 
-### 7.2. Валидация
+### 6.2. Валидация
 
 Все запросы валидируются перед выполнением:
 - Проверка наличия всех переменных
@@ -803,22 +749,21 @@ var (
 - Проверка обязательных полей (method, URL)
 - Проверка формата тела запроса
 
-## 8. Зависимости и библиотеки
+## 7. Зависимости и библиотеки
 
-### 8.1. Стандартная библиотека Go
+### 7.1. Стандартная библиотека Go
 - `net/http` - HTTP клиент
 - `encoding/json` - работа с JSON
-- `gopkg.in/yaml.v3` - работа с YAML
 - `os`, `path/filepath` - работа с файловой системой
 - `time` - работа со временем
 - `fmt`, `strings` - форматирование и работа со строками
 
-### 8.2. Рекомендуемые third-party библиотеки
+### 7.2. Рекомендуемые third-party библиотеки
 - `github.com/fatih/color` - цветной вывод в консоль
 - `github.com/google/uuid` - генерация UUID
-- `gopkg.in/yaml.v3` - парсинг YAML
+- `gopkg.in/yaml.v3` - парсинг и работа с YAML
 
-## 9. Ограничения MVP
+## 8. Ограничения MVP
 
 На стадии MVP не реализуются:
 - Пред/пост-скрипты
@@ -830,7 +775,7 @@ var (
 - Retry механизм
 - Плагины и расширения
 
-## 10. Будущие улучшения
+## 9. Будущие улучшения
 
 Возможные улучшения для следующих версий:
 - Поддержка скриптов (JavaScript или Go)
