@@ -561,8 +561,8 @@ func main() {
         log.Fatal(err)
     }
 
-    if result.Error != nil {
-        fmt.Printf("Error: %v\n", result.Error)
+    if result.Error != "" {
+        fmt.Printf("Error: %s\n", result.Error)
         return
     }
 
@@ -715,8 +715,8 @@ func main() {
 
     for i, exec := range history {
         fmt.Printf("%d. Request: %s %s\n", i+1, exec.Request.Method, exec.Request.URL)
-        if exec.Error != nil {
-            fmt.Printf("   Error: %v\n", exec.Error)
+        if exec.Error != "" {
+            fmt.Printf("   Error: %s\n", exec.Error)
         } else {
             fmt.Printf("   Status: %d\n", exec.Response.StatusCode)
             fmt.Printf("   Duration: %v\n", exec.Duration)
@@ -730,6 +730,8 @@ func main() {
 ### 6.1. Типы ошибок
 
 ```go
+import "errors"
+
 var (
     ErrEnvironmentNotFound = errors.New("environment not found")
     ErrCollectionNotFound   = errors.New("collection not found")
@@ -762,29 +764,3 @@ var (
 - `github.com/fatih/color` - цветной вывод в консоль
 - `github.com/google/uuid` - генерация UUID
 - `gopkg.in/yaml.v3` - парсинг и работа с YAML
-
-## 8. Ограничения MVP
-
-На стадии MVP не реализуются:
-- Пред/пост-скрипты
-- Тесты и ассерты
-- Динамические переменные
-- Переменные из ответов предыдущих запросов
-- Версионирование коллекций и окружений
-- Параллельное выполнение запросов
-- Retry механизм
-- Плагины и расширения
-
-## 9. Будущие улучшения
-
-Возможные улучшения для следующих версий:
-- Поддержка скриптов (JavaScript или Go)
-- Система тестов и ассертов
-- Динамические переменные (генерация значений)
-- Извлечение переменных из ответов (JSONPath, regex)
-- Параллельное выполнение запросов
-- Retry механизм с настраиваемыми стратегиями
-- Экспорт результатов в различные форматы (HTML, PDF)
-- Веб-интерфейс для управления коллекциями
-- Интеграция с CI/CD системами
-
