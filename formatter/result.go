@@ -191,7 +191,7 @@ func PrintStatistics(stats *types.Statistics) {
 }
 
 func maskToken(token string) string {
-	if len(token) <= 8 {
+	if len(token) < 8 {
 		return "***"
 	}
 	return token[:4] + "..." + token[len(token)-4:]

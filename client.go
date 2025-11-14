@@ -113,24 +113,22 @@ func (c *Client) SaveEnvironment(env *types.Environment) error {
 
 func (c *Client) ListEnvironments() ([]string, error) {
 	dir := c.storage.EnvironmentsDir()
-
-	fmt.Printf("ListEnvironments: env dir: %s\n", dir)
-
 	entries, err := os.ReadDir(dir)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to read environments directory: %w", err)
 	}
 
-	fmt.Printf("ListEnvironments: entries: len = %d\n", len(entries))
 	var names []string
+
 	for _, entry := range entries {
-		fmt.Printf("ListEnvironments: check: %s. Is Dir ? %t\n", entry.Name(), entry.IsDir())
 		if entry.IsDir() {
 			continue
 		}
+
 		name := entry.Name()
+
 		if len(name) > 5 && name[len(name)-5:] == ".json" {
-			fmt.Printf("ListEnvironments: append.\n")
 			names = append(names, name[:len(name)-5])
 		}
 	}
@@ -140,9 +138,11 @@ func (c *Client) ListEnvironments() ([]string, error) {
 
 func (c *Client) DeleteEnvironment(name string) error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", name))
+
 	if err := os.Remove(filePath); err != nil {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, name)
 	}
+
 	return nil
 }
 

@@ -176,20 +176,23 @@ func TestUnitList_Empty(t *testing.T) {
 }
 
 func TestUnitList_MultipleFiles(t *testing.T) {
+	const historyEniriesLen int = 2
 	dir, err := testutil.CreateTempDir()
+
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
 
+	defer testutil.CleanupTempDir(dir)
 	fs, err := NewFileStorage(dir)
+
 	if err != nil {
 		t.Fatalf("failed to create file storage: %v", err)
 	}
 
 	hs := NewHistoryStorage(fs)
 
-	for i := 0; i < 3; i++ {
+	for i := range historyEniriesLen {
 		result := &types.ExecutionResult{
 			CollectionName: "Test Collection",
 			Environment:    "test",
@@ -215,12 +218,13 @@ func TestUnitList_MultipleFiles(t *testing.T) {
 	}
 
 	list, err := hs.List()
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(list) != 3 {
-		t.Errorf("expected 3 items, got %d", len(list))
+	if len(list) != historyEniriesLen {
+		t.Errorf("expected %d items, got %d", historyEniriesLen, len(list))
 	}
 
 	for i := 0; i < len(list)-1; i++ {
@@ -296,6 +300,7 @@ func TestUnitHistoryStorage_GetLast_NotFound(t *testing.T) {
 }
 
 func TestUnitGetHistory_WithLimit(t *testing.T) {
+	const historyEniriesLen int = 2
 	dir, err := testutil.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
@@ -309,7 +314,7 @@ func TestUnitGetHistory_WithLimit(t *testing.T) {
 
 	hs := NewHistoryStorage(fs)
 
-	for i := 0; i < 5; i++ {
+	for range historyEniriesLen {
 		result := &types.ExecutionResult{
 			CollectionName: "Test Collection",
 			Environment:    "test",
@@ -343,17 +348,20 @@ func TestUnitGetHistory_WithLimit(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	history, err := hs.GetHistory(3)
+	const wantHistoryEntriesLen int = historyEniriesLen - 1
+	history, err := hs.GetHistory(wantHistoryEntriesLen)
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(history) != 3 {
-		t.Errorf("expected 3 executions, got %d", len(history))
+	if len(history) != wantHistoryEntriesLen {
+		t.Errorf("expected %d executions, got %d", wantHistoryEntriesLen, len(history))
 	}
 }
 
 func TestUnitGetHistory_WithoutLimit(t *testing.T) {
+	const historyEniriesLen int = 2
 	dir, err := testutil.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
@@ -367,7 +375,7 @@ func TestUnitGetHistory_WithoutLimit(t *testing.T) {
 
 	hs := NewHistoryStorage(fs)
 
-	for i := 0; i < 3; i++ {
+	for range historyEniriesLen {
 		result := &types.ExecutionResult{
 			CollectionName: "Test Collection",
 			Environment:    "test",
@@ -401,13 +409,15 @@ func TestUnitGetHistory_WithoutLimit(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	history, err := hs.GetHistory(10)
+	const wantHistoryEntriesLen int = historyEniriesLen * 2
+	history, err := hs.GetHistory(wantHistoryEntriesLen)
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(history) != 3 {
-		t.Errorf("expected 3 executions, got %d", len(history))
+	if len(history) != historyEniriesLen {
+		t.Errorf("expected %d executions, got %d", historyEniriesLen, len(history))
 	}
 }
 

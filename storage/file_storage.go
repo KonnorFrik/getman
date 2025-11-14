@@ -14,6 +14,7 @@ type FileStorage struct {
 
 func NewFileStorage(basePath string) (*FileStorage, error) {
 	expandedPath, err := expandPath(basePath)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to expand path: %w", err)
 	}
@@ -32,11 +33,15 @@ func NewFileStorage(basePath string) (*FileStorage, error) {
 func expandPath(path string) (string, error) {
 	if strings.HasPrefix(path, "~/") {
 		homeDir, err := os.UserHomeDir()
+
 		if err != nil {
 			return "", err
 		}
-		return filepath.Join(homeDir, path[2:]), nil
+
+		result := filepath.Join(homeDir, path[2:])
+		return result, nil
 	}
+
 	return path, nil
 }
 
@@ -66,29 +71,36 @@ func (fs *FileStorage) BasePath() string {
 }
 
 func (fs *FileStorage) CollectionsDir() string {
-	return filepath.Join(fs.basePath, "collections")
+	const dirName = "collections"
+	return filepath.Join(fs.basePath, dirName)
 }
 
 func (fs *FileStorage) EnvironmentsDir() string {
-	return filepath.Join(fs.basePath, "environments")
+	const dirName = "environments"
+	return filepath.Join(fs.basePath, dirName)
 }
 
 func (fs *FileStorage) HistoryDir() string {
-	return filepath.Join(fs.basePath, "history")
+	const dirName = "history"
+	return filepath.Join(fs.basePath, dirName)
 }
 
 func (fs *FileStorage) LogsDir() string {
-	return filepath.Join(fs.basePath, "logs")
+	const dirName = "logs"
+	return filepath.Join(fs.basePath, dirName)
 }
 
 func (fs *FileStorage) ConfigPath() string {
-	return filepath.Join(fs.basePath, "config.yaml")
+	const fileName = "config.yaml"
+	return filepath.Join(fs.basePath, fileName)
 }
 
+const timeFormat string = "02_01_06_15_04_05.0000"
+
 func FormatTimestamp(t time.Time) string {
-	return t.Format("02_01_06_15_04_05")
+	return t.Format(timeFormat)
 }
 
 func ParseTimestamp(s string) (time.Time, error) {
-	return time.Parse("02_01_06_15_04_05", s)
+	return time.Parse(timeFormat, s)
 }

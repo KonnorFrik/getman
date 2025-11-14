@@ -476,7 +476,29 @@ func TestUnitGetHistory(t *testing.T) {
 		StartTime:      time.Now(),
 		EndTime:        time.Now(),
 		TotalDuration:  time.Second,
-		Requests:       []*types.RequestExecution{},
+		Requests:       []*types.RequestExecution{
+			{
+				Request: &types.Request{
+					Method: "GET",
+					URL: "url.com",
+					Headers: map[string]string{"Content-Type": "application/json"},
+					Auth: &types.Auth{
+						Type: "Bearer",
+						Token: "aboba",
+					},
+					Timeout: &types.Timeout{
+						Connect: time.Second * 30,
+						Read: time.Second * 30,
+					},
+					Cookies: &types.CookieSettings{
+						AutoManage: true,
+					},
+				},
+				Response: testutil.CreateTestResponse(200, []byte("TestBody")),
+				Duration: time.Microsecond * 150,
+				Timestamp: time.Now(),
+			},
+		},
 		Statistics: &types.Statistics{
 			Total:   0,
 			Success: 0,

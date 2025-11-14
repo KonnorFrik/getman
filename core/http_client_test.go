@@ -457,12 +457,12 @@ func TestUnitExecute_WithCookies(t *testing.T) {
 
 func TestUnitExecute_Timeout(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(2 * time.Second)
+		time.Sleep(1000 * time.Millisecond)
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
 
-	client := NewHTTPClient(1*time.Second, 1*time.Second, false)
+	client := NewHTTPClient(10 * time.Millisecond, 10 * time.Millisecond, false)
 	req := &types.Request{
 		Method: http.MethodGet,
 		URL:    server.URL,

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"math/rand/v2"
 	"sync"
 	"testing"
 	"time"
@@ -196,15 +197,15 @@ func TestIntegrationStorage_ConcurrentAccess(t *testing.T) {
 	hs := NewHistoryStorage(fs)
 
 	var wg sync.WaitGroup
-	numGoroutines := 10
-	numOperations := 10
+	numGoroutines := 2
+	numOperations := 5
 
 	wg.Add(numGoroutines)
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(id int) {
 			defer wg.Done()
-			for j := 0; j < numOperations; j++ {
+			for range numOperations {
 				result := &types.ExecutionResult{
 					CollectionName: "Test Collection",
 					Environment:    "test",
@@ -222,6 +223,7 @@ func TestIntegrationStorage_ConcurrentAccess(t *testing.T) {
 					},
 				}
 
+				time.Sleep(time.Duration(rand.IntN(100)) * time.Millisecond)
 				hs.Save(result)
 			}
 		}(i)

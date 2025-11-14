@@ -3,6 +3,7 @@ package core
 import (
 	"testing"
 
+	stderrors "errors"
 	"github.com/KonnorFrik/getman/errors"
 	"github.com/KonnorFrik/getman/variables"
 )
@@ -61,7 +62,7 @@ func TestUnitResolve_VariableNotFound(t *testing.T) {
 		t.Fatal("expected error for nonexistent variable")
 	}
 
-	if err != errors.ErrVariableNotFound {
+	if !stderrors.Is(err, errors.ErrVariableNotFound) {
 		t.Errorf("expected ErrVariableNotFound, got %v", err)
 	}
 }
@@ -189,7 +190,7 @@ func TestUnitValidateVariables_NotFound(t *testing.T) {
 		t.Fatal("expected error for nonexistent variable")
 	}
 
-	if err != errors.ErrVariableNotFound {
+	if !stderrors.Is(err, errors.ErrVariableNotFound) {
 		t.Errorf("expected ErrVariableNotFound, got %v", err)
 	}
 }
