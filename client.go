@@ -45,10 +45,10 @@ func NewClient(basePath string) (*Client, error) {
 		}
 	}
 
-	expandedBasePath, _ := storage.ExpandPath(config.Storage.BasePath)
-	if expandedBasePath != "" {
-		fileStorage, _ = storage.NewFileStorage(expandedBasePath)
-	}
+	// expandedBasePath, _ := storage.ExpandPath(config.Storage.BasePath)
+	// if expandedBasePath != "" {
+	// 	fileStorage, _ = storage.NewFileStorage(expandedBasePath)
+	// }
 
 	historyStorage := storage.NewHistoryStorage(fileStorage)
 	logStorage := storage.NewLogStorage(fileStorage)
@@ -113,18 +113,24 @@ func (c *Client) SaveEnvironment(env *types.Environment) error {
 
 func (c *Client) ListEnvironments() ([]string, error) {
 	dir := c.storage.EnvironmentsDir()
+
+	fmt.Printf("ListEnvironments: env dir: %s\n", dir)
+
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read environments directory: %w", err)
 	}
 
+	fmt.Printf("ListEnvironments: entries: len = %d\n", len(entries))
 	var names []string
 	for _, entry := range entries {
+		fmt.Printf("ListEnvironments: check: %s. Is Dir ? %t\n", entry.Name(), entry.IsDir())
 		if entry.IsDir() {
 			continue
 		}
 		name := entry.Name()
 		if len(name) > 5 && name[len(name)-5:] == ".json" {
+			fmt.Printf("ListEnvironments: append.\n")
 			names = append(names, name[:len(name)-5])
 		}
 	}

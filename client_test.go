@@ -140,7 +140,7 @@ func TestUnitListEnvironments(t *testing.T) {
 	}
 
 	if len(environments) != 2 {
-		t.Errorf("expected 2 environments, got %d", len(environments))
+		t.Errorf("expected 2 environments, got %d: %v", len(environments), environments)
 	}
 }
 
