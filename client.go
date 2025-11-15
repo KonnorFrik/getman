@@ -97,6 +97,7 @@ func NewClientWithDefaults() (*Client, error) {
 func (c *Client) LoadEnvironment(name string) error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", name))
 	env, err := variables.LoadEnvironmentFromFile(filePath)
+
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, name)
 	}
@@ -158,6 +159,10 @@ func (c *Client) GetGlobalVariable(key string) (string, bool) {
 	return c.variableStore.GetGlobal(key)
 }
 
+func (c *Client) SetVariable(key, value string) {
+	c.variableStore.SetEnv(key, value)
+}
+
 func (c *Client) GetVariable(key string) (string, bool) {
 	return c.variableStore.Get(key)
 }
@@ -168,10 +173,13 @@ func (c *Client) ResolveVariables(template string) (string, error) {
 
 func (c *Client) LoadCollection(name string) (*types.Collection, error) {
 	filePath := collections.GetCollectionPath(c.storage, name)
+	fmt.Printf("LoadCollection: got path: %s\n", filePath)
 	collection, err := collections.LoadCollectionFromFile(filePath)
+
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrCollectionNotFound, name)
 	}
+
 	return collection, nil
 }
 
