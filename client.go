@@ -39,6 +39,7 @@ func NewClient(basePath string) (*Client, error) {
 		return nil, err
 	}
 
+	client.storage = fileStorage
 	config := DefaultConfig()
 	configPath := fileStorage.ConfigPath()
 
@@ -70,7 +71,6 @@ func NewClient(basePath string) (*Client, error) {
 	httpClient := core.NewHTTPClient(connectTimeout, readTimeout, autoManageCookies)
 	collectionExecutor := collections.NewCollectionExecutor(httpClient, variableResolver)
 
-	client.storage = fileStorage
 	client.historyStorage = historyStorage
 	client.logStorage = logStorage
 	client.variableResolver = variableResolver

@@ -10,6 +10,11 @@ import (
 	"github.com/fatih/color"
 )
 
+var (
+	colorFgMagneta = color.New(color.FgHiMagenta)
+	colorFgCyan = color.New(color.FgHiCyan)
+)
+
 func FormatRequest(req *types.Request) string {
 	var sb strings.Builder
 
@@ -148,24 +153,41 @@ func PrintExecutionResult(result *types.ExecutionResult) {
 	}
 
 	fmt.Println("\nRequests:")
+
 	for i, req := range result.Requests {
 		fmt.Printf("\n%d. %s %s\n", i+1, req.Request.Method, req.Request.URL)
+
 		if req.Error != "" {
 			color.Red("   Error: %s\n", req.Error)
+
 		} else if req.Response != nil {
 			var statusColor *color.Color
+
 			switch {
 			case req.Response.StatusCode >= 200 && req.Response.StatusCode < 300:
 				statusColor = color.New(color.FgGreen)
+
 			case req.Response.StatusCode >= 300 && req.Response.StatusCode < 400:
 				statusColor = color.New(color.FgYellow)
+
 			case req.Response.StatusCode >= 400 && req.Response.StatusCode < 500:
 				statusColor = color.New(color.FgRed)
+
 			default:
 				statusColor = color.New(color.FgMagenta)
 			}
+
 			statusColor.Printf("   Status: %d\n", req.Response.StatusCode)
 			fmt.Printf("   Duration: %v\n", req.Duration)
+			colorFgMagneta.Printf("   Headers:\n")
+
+			for k, v := range req.Response.Headers {
+				colorFgCyan.Printf("\t%s", k)
+				fmt.Printf(": %s\n", strings.Join(v, " "))
+			}
+
+			colorFgMagneta.Printf("   Body:\n")
+			fmt.Printf("%s\n", string(req.Response.Body))
 		}
 	}
 }
