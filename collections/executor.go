@@ -28,8 +28,9 @@ func (ce *CollectionExecutor) ExecuteCollectionSelective(collection *types.Colle
 	startTime := time.Now()
 
 	var itemsToExecute []*types.RequestItem
-	if itemNames == nil || len(itemNames) == 0 {
+	if len(itemNames) == 0 {
 		itemsToExecute = collection.Items
+
 	} else {
 		itemMap := make(map[string]*types.RequestItem)
 		for _, item := range collection.Items {

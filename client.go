@@ -26,7 +26,7 @@ type Client struct {
 	httpClient         *core.HTTPClient
 	collectionExecutor *collections.CollectionExecutor
 	env                *types.Environment
-	// globalEnv          *types.Environment
+	globalEnv          *types.Environment
 	config *Config
 }
 
@@ -44,11 +44,6 @@ func NewClient(basePath string) (*Client, error) {
 			config = loadedConfig
 		}
 	}
-
-	// expandedBasePath, _ := storage.ExpandPath(config.Storage.BasePath)
-	// if expandedBasePath != "" {
-	// 	fileStorage, _ = storage.NewFileStorage(expandedBasePath)
-	// }
 
 	historyStorage := storage.NewHistoryStorage(fileStorage)
 	logStorage := storage.NewLogStorage(fileStorage)
