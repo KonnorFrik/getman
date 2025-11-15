@@ -14,32 +14,37 @@ import (
 	"github.com/KonnorFrik/getman/importer"
 	"github.com/KonnorFrik/getman/storage"
 	"github.com/KonnorFrik/getman/types"
-	"github.com/KonnorFrik/getman/variables"
+	"github.com/KonnorFrik/getman/environment"
 )
 
 type Client struct {
 	storage            *storage.FileStorage
 	historyStorage     *storage.HistoryStorage
 	logStorage         *storage.LogStorage
-	variableStore      *variables.VariableStore
-	variableResolver   *core.VariableResolver
 	httpClient         *core.HTTPClient
 	collectionExecutor *collections.CollectionExecutor
-	env                *types.Environment
-	globalEnv          *types.Environment
+	variableResolver   *core.VariableResolver
+	env                *environment.Environment
+	globalEnv          *environment.Environment
 	config *Config
 }
 
+const globalEnvName = "global"
+
 func NewClient(basePath string) (*Client, error) {
+	var client Client
 	fileStorage, err := storage.NewFileStorage(basePath)
+
 	if err != nil {
 		return nil, err
 	}
 
 	config := DefaultConfig()
 	configPath := fileStorage.ConfigPath()
+
 	if _, err := os.Stat(configPath); err == nil {
 		loadedConfig, err := LoadConfig(configPath)
+
 		if err == nil {
 			config = loadedConfig
 		}
@@ -47,8 +52,17 @@ func NewClient(basePath string) (*Client, error) {
 
 	historyStorage := storage.NewHistoryStorage(fileStorage)
 	logStorage := storage.NewLogStorage(fileStorage)
-	variableStore := variables.NewVariableStore()
-	variableResolver := core.NewVariableResolver(variableStore)
+	err = client.LoadGlobalEnvironment()
+
+	if err != nil {
+		client.globalEnv = environment.NewEnvironment(globalEnvName)
+	}
+
+	variableResolver, err := core.NewVariableResolver(client.globalEnv, nil)
+
+	if err != nil {
+		return nil, err
+	}
 
 	connectTimeout := config.Defaults.Timeout.Connect
 	readTimeout := config.Defaults.Timeout.Read
@@ -56,16 +70,25 @@ func NewClient(basePath string) (*Client, error) {
 	httpClient := core.NewHTTPClient(connectTimeout, readTimeout, autoManageCookies)
 	collectionExecutor := collections.NewCollectionExecutor(httpClient, variableResolver)
 
-	return &Client{
-		storage:            fileStorage,
-		historyStorage:     historyStorage,
-		logStorage:         logStorage,
-		variableStore:      variableStore,
-		variableResolver:   variableResolver,
-		httpClient:         httpClient,
-		collectionExecutor: collectionExecutor,
-		config:             config,
-	}, nil
+	client.storage = fileStorage
+	client.historyStorage = historyStorage
+	client.logStorage = logStorage
+	client.variableResolver = variableResolver
+	client.httpClient = httpClient
+	client.collectionExecutor = collectionExecutor
+	client.config = config
+
+	return &client, nil
+	// return &Client{
+	// 	storage:            fileStorage,
+	// 	historyStorage:     historyStorage,
+	// 	logStorage:         logStorage,
+	// 	// variableResolver:   variableResolver,
+	// 	variableResolver: variableResolver,
+	// 	httpClient:         httpClient,
+	// 	collectionExecutor: collectionExecutor,
+	// 	config:             config,
+	// }, nil
 }
 
 // NewClientWithConfig создает новый клиент с конфигурацией из файла
@@ -89,22 +112,48 @@ func NewClientWithDefaults() (*Client, error) {
 	return NewClient(basePath)
 }
 
-func (c *Client) LoadEnvironment(name string) error {
+func (c *Client) LoadLocalEnvironment(name string) error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", name))
-	env, err := variables.LoadEnvironmentFromFile(filePath)
+	env, err := environment.NewEnvironmentFromFile(filePath)
 
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, name)
 	}
 
 	c.env = env
-	c.variableStore.SetEnvVars(env.Variables)
+	c.variableResolver.SetLocal(env)
 	return nil
 }
 
-func (c *Client) SaveEnvironment(env *types.Environment) error {
-	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", env.Name))
-	return variables.SaveEnvironmentToFile(env, filePath)
+func (c *Client) LoadGlobalEnvironment() error {
+	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", globalEnvName))
+	env, err := environment.NewEnvironmentFromFile(filePath)
+
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, globalEnvName)
+	}
+
+	c.env = env
+	c.variableResolver.SetGlobal(env)
+	return nil
+}
+
+func (c *Client) SaveEnvironments() error {
+	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
+	err := c.env.Save(filePath)
+
+	if err != nil {
+		return err
+	}
+
+	globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
+	err = c.globalEnv.Save(globalFilePath)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) ListEnvironments() ([]string, error) {
@@ -142,24 +191,24 @@ func (c *Client) DeleteEnvironment(name string) error {
 	return nil
 }
 
-func (c *Client) GetCurrentEnvironment() *types.Environment {
+func (c *Client) GetCurrentEnvironment() *environment.Environment {
 	return c.env
 }
 
 func (c *Client) SetGlobalVariable(key, value string) {
-	c.variableStore.SetGlobal(key, value)
+	c.globalEnv.Set(key, value)
 }
 
 func (c *Client) GetGlobalVariable(key string) (string, bool) {
-	return c.variableStore.GetGlobal(key)
+	return c.globalEnv.Get(key)
 }
 
 func (c *Client) SetVariable(key, value string) {
-	c.variableStore.SetEnv(key, value)
+	c.env.Set(key, value)
 }
 
 func (c *Client) GetVariable(key string) (string, bool) {
-	return c.variableStore.Get(key)
+	return c.env.Get(key)
 }
 
 func (c *Client) ResolveVariables(template string) (string, error) {

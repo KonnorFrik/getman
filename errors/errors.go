@@ -10,4 +10,6 @@ var (
 	ErrInvalidURL          = errors.New("invalid URL")
 	ErrRequestFailed       = errors.New("request failed")
 	ErrStorageError        = errors.New("storage error")
+
+	ErrInvalidArgument     = errors.New("invalid argument")
 )

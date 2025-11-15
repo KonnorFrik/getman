@@ -1,4 +1,4 @@
-package variables
+package environment
 
 import (
 	"os"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/KonnorFrik/getman/testutil"
-	"github.com/KonnorFrik/getman/types"
 )
 
 func TestUnitLoadEnvironmentFromFile_Valid(t *testing.T) {
@@ -29,7 +28,7 @@ func TestUnitLoadEnvironmentFromFile_Valid(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	env, err := LoadEnvironmentFromFile(filePath)
+	env, err := NewEnvironmentFromFile(filePath)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -59,14 +58,14 @@ func TestUnitLoadEnvironmentFromFile_InvalidJSON(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	_, err = LoadEnvironmentFromFile(filePath)
+	_, err = NewEnvironmentFromFile(filePath)
 	if err == nil {
 		t.Fatal("expected error for invalid JSON")
 	}
 }
 
 func TestUnitLoadEnvironmentFromFile_FileNotFound(t *testing.T) {
-	_, err := LoadEnvironmentFromFile("/nonexistent/file.json")
+	_, err := NewEnvironmentFromFile("/nonexistent/file.json")
 	if err == nil {
 		t.Fatal("expected error for nonexistent file")
 	}
@@ -89,7 +88,7 @@ func TestUnitLoadEnvironmentFromFile_InvalidEnvironment(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	_, err = LoadEnvironmentFromFile(filePath)
+	_, err = NewEnvironmentFromFile(filePath)
 	if err == nil {
 		t.Fatal("expected error for invalid environment")
 	}
@@ -102,7 +101,7 @@ func TestUnitSaveEnvironmentToFile_Valid(t *testing.T) {
 	}
 	defer testutil.CleanupTempDir(dir)
 
-	env := &types.Environment{
+	env := &Environment{
 		Name: "test",
 		Variables: map[string]string{
 			"key1": "value1",
@@ -111,7 +110,7 @@ func TestUnitSaveEnvironmentToFile_Valid(t *testing.T) {
 	}
 
 	filePath := filepath.Join(dir, "test.json")
-	if err := SaveEnvironmentToFile(env, filePath); err != nil {
+	if err := env.Save(filePath); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -119,7 +118,7 @@ func TestUnitSaveEnvironmentToFile_Valid(t *testing.T) {
 		t.Fatal("expected file to be created")
 	}
 
-	loadedEnv, err := LoadEnvironmentFromFile(filePath)
+	loadedEnv, err := NewEnvironmentFromFile(filePath)
 	if err != nil {
 		t.Fatalf("unexpected error loading environment: %v", err)
 	}
@@ -135,25 +134,28 @@ func TestUnitSaveEnvironmentToFile_Valid(t *testing.T) {
 
 func TestUnitSaveEnvironmentToFile_InvalidEnvironment(t *testing.T) {
 	dir, err := testutil.CreateTempDir()
+
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
+
 	defer testutil.CleanupTempDir(dir)
 
-	env := &types.Environment{
+	env := &Environment{
 		Name:      "",
 		Variables: map[string]string{},
 	}
 
 	filePath := filepath.Join(dir, "test.json")
-	err = SaveEnvironmentToFile(env, filePath)
+	err = env.Save(filePath)
+
 	if err == nil {
 		t.Fatal("expected error for invalid environment")
 	}
 }
 
 func TestUnitValidateEnvironment_Valid(t *testing.T) {
-	env := &types.Environment{
+	env := &Environment{
 		Name: "test",
 		Variables: map[string]string{
 			"key1": "value1",
@@ -166,7 +168,7 @@ func TestUnitValidateEnvironment_Valid(t *testing.T) {
 }
 
 func TestUnitValidateEnvironment_MissingName(t *testing.T) {
-	env := &types.Environment{
+	env := &Environment{
 		Name:      "",
 		Variables: map[string]string{},
 	}
@@ -178,7 +180,7 @@ func TestUnitValidateEnvironment_MissingName(t *testing.T) {
 }
 
 func TestUnitValidateEnvironment_NilVariables(t *testing.T) {
-	env := &types.Environment{
+	env := &Environment{
 		Name:      "test",
 		Variables: nil,
 	}
@@ -209,7 +211,7 @@ func TestUnitLoadEnvironmentFromFile_EmptyVariables(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	env, err := LoadEnvironmentFromFile(filePath)
+	env, err := NewEnvironmentFromFile(filePath)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -230,17 +232,17 @@ func TestUnitSaveEnvironmentToFile_EmptyVariables(t *testing.T) {
 	}
 	defer testutil.CleanupTempDir(dir)
 
-	env := &types.Environment{
+	env := &Environment{
 		Name:      "test",
 		Variables: map[string]string{},
 	}
 
 	filePath := filepath.Join(dir, "test.json")
-	if err := SaveEnvironmentToFile(env, filePath); err != nil {
+	if err := env.Save(filePath); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	loadedEnv, err := LoadEnvironmentFromFile(filePath)
+	loadedEnv, err := NewEnvironmentFromFile(filePath)
 	if err != nil {
 		t.Fatalf("unexpected error loading environment: %v", err)
 	}

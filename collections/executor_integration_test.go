@@ -8,7 +8,7 @@ import (
 	"github.com/KonnorFrik/getman/core"
 	"github.com/KonnorFrik/getman/testutil"
 	"github.com/KonnorFrik/getman/types"
-	"github.com/KonnorFrik/getman/variables"
+	"github.com/KonnorFrik/getman/environment"
 )
 
 func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
@@ -19,8 +19,13 @@ func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
 	defer testutil.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
-	store := variables.NewVariableStore()
-	resolver := core.NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := core.NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	executor := NewCollectionExecutor(httpClient, resolver)
 
 	collection := &types.Collection{
@@ -58,8 +63,13 @@ func TestIntegrationExecuteCollection_MultipleRequests(t *testing.T) {
 	defer testutil.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
-	store := variables.NewVariableStore()
-	resolver := core.NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := core.NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	executor := NewCollectionExecutor(httpClient, resolver)
 
 	collection := &types.Collection{
@@ -104,8 +114,14 @@ func TestIntegrationExecuteCollection_WithVariables(t *testing.T) {
 	defer testutil.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
-	store := variables.NewVariableStore()
-	store.SetEnv("baseUrl", testutil.GetServerURL())
+	env := environment.NewEnvironment("global")
+	resolver, err := core.NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	env.Set("baseUrl", testutil.GetServerURL())
 	resolver := core.NewVariableResolver(store)
 	executor := NewCollectionExecutor(httpClient, resolver)
 
