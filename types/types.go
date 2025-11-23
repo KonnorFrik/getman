@@ -55,7 +55,7 @@ type Collection struct {
 	Name        string         `json:"name"`
 	Description string         `json:"description,omitempty"`
 	Items       []*RequestItem `json:"items"`
-	// TODO: add used env
+	EnvName    string          `json:"environment_name"`
 }
 
 type RequestItem struct {

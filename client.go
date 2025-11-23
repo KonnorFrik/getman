@@ -79,16 +79,6 @@ func NewClient(basePath string) (*Client, error) {
 	client.config = config
 
 	return &client, nil
-	// return &Client{
-	// 	storage:            fileStorage,
-	// 	historyStorage:     historyStorage,
-	// 	logStorage:         logStorage,
-	// 	// variableResolver:   variableResolver,
-	// 	variableResolver: variableResolver,
-	// 	httpClient:         httpClient,
-	// 	collectionExecutor: collectionExecutor,
-	// 	config:             config,
-	// }, nil
 }
 
 // NewClientWithConfig создает новый клиент с конфигурацией из файла
@@ -217,11 +207,22 @@ func (c *Client) ResolveVariables(template string) (string, error) {
 
 func (c *Client) LoadCollection(name string) (*types.Collection, error) {
 	filePath := collections.GetCollectionPath(c.storage, name)
-	fmt.Printf("LoadCollection: got path: %s\n", filePath)
 	collection, err := collections.LoadCollectionFromFile(filePath)
+
+	fmt.Printf("LoadCollection: load: %s\n", name)
 
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrCollectionNotFound, name)
+	}
+
+	fmt.Printf("LoadCollection: loaded: %+v\n", collection)
+
+	if collection.EnvName != "" {
+		err = c.LoadLocalEnvironment(collection.EnvName)
+
+		if err != nil {
+			return collection, fmt.Errorf("%w: %s", ErrEnvironmentNotFound, collection.EnvName)
+		}
 	}
 
 	return collection, nil
