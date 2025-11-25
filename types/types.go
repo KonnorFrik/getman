@@ -46,18 +46,6 @@ type Response struct {
 	Size       int64               `json:"size"`
 }
 
-type Environment struct {
-	Name      string            `json:"name"`
-	Variables map[string]string `json:"variables"`
-}
-
-type Collection struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description,omitempty"`
-	Items       []*RequestItem `json:"items"`
-	EnvName    string          `json:"environment_name"`
-}
-
 type RequestItem struct {
 	Name    string   `json:"name"`
 	Request *Request `json:"request"`

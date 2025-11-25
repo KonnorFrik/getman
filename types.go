@@ -1,6 +1,10 @@
 package getman
 
-import "github.com/KonnorFrik/getman/types"
+import (
+	"github.com/KonnorFrik/getman/collections"
+	"github.com/KonnorFrik/getman/environment"
+	"github.com/KonnorFrik/getman/types"
+)
 
 type Request = types.Request
 type RequestBody = types.RequestBody
@@ -8,8 +12,8 @@ type Auth = types.Auth
 type Timeout = types.Timeout
 type CookieSettings = types.CookieSettings
 type Response = types.Response
-type Environment = types.Environment
-type Collection = types.Collection
+type Environment = environment.Environment
+type Collection = collections.Collection
 type RequestItem = types.RequestItem
 type RequestExecution = types.RequestExecution
 type ExecutionResult = types.ExecutionResult

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/KonnorFrik/getman/collections"
 	"github.com/KonnorFrik/getman/types"
 )
 
@@ -85,7 +86,7 @@ type PostmanAuthField struct {
 	Type  string `json:"type,omitempty"`
 }
 
-func ImportFromPostman(filePath string) (*types.Collection, error) {
+func ImportFromPostman(filePath string) (*collections.Collection, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read Postman collection file: %w", err)
@@ -96,7 +97,7 @@ func ImportFromPostman(filePath string) (*types.Collection, error) {
 		return nil, fmt.Errorf("failed to parse Postman collection: %w", err)
 	}
 
-	collection := &types.Collection{
+	collection := &collections.Collection{
 		Name:        postmanCollection.Info.Name,
 		Description: postmanCollection.Info.Description,
 		Items:       []*types.RequestItem{},

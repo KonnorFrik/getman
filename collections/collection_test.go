@@ -113,7 +113,7 @@ func TestUnitSaveCollectionToFile_Valid(t *testing.T) {
 	}
 	defer testutil.CleanupTempDir(dir)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name:        "Test Collection",
 		Description: "Test description",
 		Items: []*types.RequestItem{
@@ -153,7 +153,7 @@ func TestUnitSaveCollectionToFile_InvalidCollection(t *testing.T) {
 	}
 	defer testutil.CleanupTempDir(dir)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name:  "",
 		Items: []*types.RequestItem{},
 	}
@@ -166,7 +166,7 @@ func TestUnitSaveCollectionToFile_InvalidCollection(t *testing.T) {
 }
 
 func TestUnitValidateCollection_Valid(t *testing.T) {
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -185,7 +185,7 @@ func TestUnitValidateCollection_Valid(t *testing.T) {
 }
 
 func TestUnitValidateCollection_MissingName(t *testing.T) {
-	collection := &types.Collection{
+	collection := &Collection{
 		Name:  "",
 		Items: []*types.RequestItem{},
 	}
@@ -197,7 +197,7 @@ func TestUnitValidateCollection_MissingName(t *testing.T) {
 }
 
 func TestUnitValidateCollection_MissingItemName(t *testing.T) {
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -217,7 +217,7 @@ func TestUnitValidateCollection_MissingItemName(t *testing.T) {
 }
 
 func TestUnitValidateCollection_MissingRequest(t *testing.T) {
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -254,7 +254,7 @@ func TestUnitGetCollectionPath(t *testing.T) {
 }
 
 func TestUnitValidateCollection_EmptyItems(t *testing.T) {
-	collection := &types.Collection{
+	collection := &Collection{
 		Name:  "Test Collection",
 		Items: nil,
 	}
@@ -329,7 +329,7 @@ func TestUnitSaveCollectionToFile_EmptyItems(t *testing.T) {
 	}
 	defer testutil.CleanupTempDir(dir)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name:  "Test Collection",
 		Items: []*types.RequestItem{},
 	}

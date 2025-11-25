@@ -27,7 +27,7 @@ func FormatResponse(resp *types.Response) string {
 		sb.WriteString("\nBody:\n")
 		var bodyStr string
 		if isJSON(resp.Body) {
-			var jsonObj interface{}
+			var jsonObj any
 			if err := json.Unmarshal(resp.Body, &jsonObj); err == nil {
 				prettyJSON, err := json.MarshalIndent(jsonObj, "", "  ")
 				if err == nil {
@@ -76,7 +76,7 @@ func PrintResponse(resp *types.Response) {
 		fmt.Println("\nBody:")
 		var bodyStr string
 		if isJSON(resp.Body) {
-			var jsonObj interface{}
+			var jsonObj any
 			if err := json.Unmarshal(resp.Body, &jsonObj); err == nil {
 				prettyJSON, err := json.MarshalIndent(jsonObj, "", "  ")
 				if err == nil {

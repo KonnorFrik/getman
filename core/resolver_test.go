@@ -4,14 +4,19 @@ import (
 	"testing"
 
 	stderrors "errors"
+
+	"github.com/KonnorFrik/getman/environment"
 	"github.com/KonnorFrik/getman/errors"
-	"github.com/KonnorFrik/getman/variables"
 )
 
 func TestUnitResolve_SimpleVariable(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("testVar", "testValue")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envG.Set("testVar", "testValue")
+	resolver, err := NewVariableResolver(envG, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{testVar}}")
 	if err != nil {
@@ -24,10 +29,14 @@ func TestUnitResolve_SimpleVariable(t *testing.T) {
 }
 
 func TestUnitResolve_MultipleVariables(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("var1", "value1")
-	store.SetGlobal("var2", "value2")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envG.Set("var1", "value1")
+	envG.Set("var2", "value2")
+	resolver, err := NewVariableResolver(envG, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{var1}} and {{var2}}")
 	if err != nil {
@@ -40,8 +49,12 @@ func TestUnitResolve_MultipleVariables(t *testing.T) {
 }
 
 func TestUnitResolve_NoVariables(t *testing.T) {
-	store := variables.NewVariableStore()
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("no variables here")
 	if err != nil {
@@ -54,10 +67,14 @@ func TestUnitResolve_NoVariables(t *testing.T) {
 }
 
 func TestUnitResolve_VariableNotFound(t *testing.T) {
-	store := variables.NewVariableStore()
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := NewVariableResolver(env, nil)
 
-	_, err := resolver.Resolve("{{nonexistent}}")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	_, err = resolver.Resolve("{{nonexistent}}")
 	if err == nil {
 		t.Fatal("expected error for nonexistent variable")
 	}
@@ -68,10 +85,15 @@ func TestUnitResolve_VariableNotFound(t *testing.T) {
 }
 
 func TestUnitResolve_EnvVariablePriority(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("testVar", "globalValue")
-	store.SetEnv("testVar", "envValue")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envL := environment.NewEnvironment("global")
+	envG.Set("testVar", "globalValue")
+	envL.Set("testVar", "envValue")
+	resolver, err := NewVariableResolver(envG, envL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{testVar}}")
 	if err != nil {
@@ -84,9 +106,13 @@ func TestUnitResolve_EnvVariablePriority(t *testing.T) {
 }
 
 func TestUnitResolve_GlobalVariable(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("testVar", "globalValue")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envG.Set("testVar", "globalValue")
+	resolver, err := NewVariableResolver(envG, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{testVar}}")
 	if err != nil {
@@ -99,11 +125,15 @@ func TestUnitResolve_GlobalVariable(t *testing.T) {
 }
 
 func TestUnitResolve_ComplexTemplate(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("baseUrl", "http://example.com")
-	store.SetGlobal("path", "api/users")
-	store.SetGlobal("id", "123")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envG.Set("baseUrl", "http://example.com")
+	envG.Set("path", "api/users")
+	envG.Set("id", "123")
+	resolver, err := NewVariableResolver(envG, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{baseUrl}}/{{path}}/{{id}}")
 	if err != nil {
@@ -117,10 +147,14 @@ func TestUnitResolve_ComplexTemplate(t *testing.T) {
 }
 
 func TestUnitResolveMap(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("key", "testKey")
-	store.SetGlobal("value", "testValue")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envG.Set("key", "testKey")
+	envG.Set("value", "testValue")
+	resolver, err := NewVariableResolver(envG, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	input := map[string]string{
 		"{{key}}": "{{value}}",
@@ -137,10 +171,14 @@ func TestUnitResolveMap(t *testing.T) {
 }
 
 func TestUnitResolveMap_WithVariables(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("header", "Authorization")
-	store.SetGlobal("token", "Bearer abc123")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envG.Set("header", "Authorization")
+	envG.Set("token", "Bearer abc123")
+	resolver, err := NewVariableResolver(envG, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	input := map[string]string{
 		"{{header}}": "{{token}}",
@@ -157,35 +195,47 @@ func TestUnitResolveMap_WithVariables(t *testing.T) {
 }
 
 func TestUnitResolveMap_VariableNotFound(t *testing.T) {
-	store := variables.NewVariableStore()
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	input := map[string]string{
 		"key": "{{nonexistent}}",
 	}
 
-	_, err := resolver.ResolveMap(input)
+	_, err = resolver.ResolveMap(input)
 	if err == nil {
 		t.Fatal("expected error for nonexistent variable")
 	}
 }
 
 func TestUnitValidateVariables(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("testVar", "testValue")
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	env.Set("testVar", "testValue")
+	resolver, err := NewVariableResolver(env, nil)
 
-	err := resolver.ValidateVariables("{{testVar}}")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	err = resolver.ValidateVariables("{{testVar}}")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestUnitValidateVariables_NotFound(t *testing.T) {
-	store := variables.NewVariableStore()
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := NewVariableResolver(env, nil)
 
-	err := resolver.ValidateVariables("{{nonexistent}}")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	err = resolver.ValidateVariables("{{nonexistent}}")
 	if err == nil {
 		t.Fatal("expected error for nonexistent variable")
 	}
@@ -196,49 +246,65 @@ func TestUnitValidateVariables_NotFound(t *testing.T) {
 }
 
 func TestUnitValidateVariables_NoVariables(t *testing.T) {
-	store := variables.NewVariableStore()
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := NewVariableResolver(env, nil)
 
-	err := resolver.ValidateVariables("no variables")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	err = resolver.ValidateVariables("no variables")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestUnitValidateVariablesInMap(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("key", "testKey")
-	store.SetGlobal("value", "testValue")
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	env.Set("key", "testKey")
+	env.Set("value", "testValue")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	input := map[string]string{
 		"{{key}}": "{{value}}",
 	}
 
-	err := resolver.ValidateVariablesInMap(input)
+	err = resolver.ValidateVariablesInMap(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestUnitValidateVariablesInMap_NotFound(t *testing.T) {
-	store := variables.NewVariableStore()
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	input := map[string]string{
 		"key": "{{nonexistent}}",
 	}
 
-	err := resolver.ValidateVariablesInMap(input)
+	err = resolver.ValidateVariablesInMap(input)
 	if err == nil {
 		t.Fatal("expected error for nonexistent variable")
 	}
 }
 
 func TestUnitResolve_EmptyVariable(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("emptyVar", "")
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	env.Set("emptyVar", "")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{emptyVar}}")
 	if err != nil {
@@ -251,9 +317,13 @@ func TestUnitResolve_EmptyVariable(t *testing.T) {
 }
 
 func TestUnitResolve_SameVariableMultipleTimes(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("var", "value")
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	env.Set("var", "value")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{var}}-{{var}}-{{var}}")
 	if err != nil {
@@ -266,9 +336,13 @@ func TestUnitResolve_SameVariableMultipleTimes(t *testing.T) {
 }
 
 func TestUnitResolve_VariableWithSpaces(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("testVar", "testValue")
-	resolver := NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	env.Set("testVar", "testValue")
+	resolver, err := NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{ testVar }}")
 	if err != nil {

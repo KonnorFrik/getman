@@ -1,6 +1,8 @@
 package testutil
 
 import (
+	"github.com/KonnorFrik/getman/collections"
+	"github.com/KonnorFrik/getman/environment"
 	"github.com/KonnorFrik/getman/types"
 )
 
@@ -138,16 +140,16 @@ func GetTestRequestItem(name string, req *types.Request) *types.RequestItem {
 	}
 }
 
-func GetTestCollectionWithItems(name string, items []*types.RequestItem) *types.Collection {
-	return &types.Collection{
+func GetTestCollectionWithItems(name string, items []*types.RequestItem) *collections.Collection {
+	return &collections.Collection{
 		Name:        name,
 		Description: "Test collection",
 		Items:       items,
 	}
 }
 
-func GetTestEnvironmentWithVars(name string, vars map[string]string) *types.Environment {
-	return &types.Environment{
+func GetTestEnvironmentWithVars(name string, vars map[string]string) *environment.Environment {
+	return &environment.Environment{
 		Name:      name,
 		Variables: vars,
 	}

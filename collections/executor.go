@@ -20,11 +20,11 @@ func NewCollectionExecutor(httpClient *core.HTTPClient, variableResolver *core.V
 	}
 }
 
-func (ce *CollectionExecutor) ExecuteCollection(collection *types.Collection, environment string) (*types.ExecutionResult, error) {
+func (ce *CollectionExecutor) ExecuteCollection(collection *Collection, environment string) (*types.ExecutionResult, error) {
 	return ce.ExecuteCollectionSelective(collection, environment, nil)
 }
 
-func (ce *CollectionExecutor) ExecuteCollectionSelective(collection *types.Collection, environment string, itemNames []string) (*types.ExecutionResult, error) {
+func (ce *CollectionExecutor) ExecuteCollectionSelective(collection *Collection, environment string, itemNames []string) (*types.ExecutionResult, error) {
 	startTime := time.Now()
 
 	var itemsToExecute []*types.RequestItem

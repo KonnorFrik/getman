@@ -146,6 +146,24 @@ func (c *Client) SaveEnvironments() error {
 	return nil
 }
 
+func (c *Client) SaveEnvironment(env *Environment) error {
+	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
+	err := c.env.Save(filePath)
+
+	if err != nil {
+		return err
+	}
+
+	globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
+	err = c.globalEnv.Save(globalFilePath)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) ListEnvironments() ([]string, error) {
 	dir := c.storage.EnvironmentsDir()
 	entries, err := os.ReadDir(dir)
@@ -205,7 +223,7 @@ func (c *Client) ResolveVariables(template string) (string, error) {
 	return c.variableResolver.Resolve(template)
 }
 
-func (c *Client) LoadCollection(name string) (*types.Collection, error) {
+func (c *Client) LoadCollection(name string) (*collections.Collection, error) {
 	filePath := collections.GetCollectionPath(c.storage, name)
 	collection, err := collections.LoadCollectionFromFile(filePath)
 
@@ -228,7 +246,7 @@ func (c *Client) LoadCollection(name string) (*types.Collection, error) {
 	return collection, nil
 }
 
-func (c *Client) SaveCollection(collection *types.Collection) error {
+func (c *Client) SaveCollection(collection *collections.Collection) error {
 	filePath := collections.GetCollectionPath(c.storage, collection.Name)
 	return collections.SaveCollectionToFile(collection, filePath)
 }
@@ -262,11 +280,11 @@ func (c *Client) DeleteCollection(name string) error {
 	return nil
 }
 
-func (c *Client) ImportFromPostman(filePath string) (*types.Collection, error) {
+func (c *Client) ImportFromPostman(filePath string) (*collections.Collection, error) {
 	return importer.ImportFromPostman(filePath)
 }
 
-func (c *Client) ExportToPostman(collection *types.Collection, filePath string) error {
+func (c *Client) ExportToPostman(collection *collections.Collection, filePath string) error {
 	data, err := json.MarshalIndent(collection, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal collection: %w", err)

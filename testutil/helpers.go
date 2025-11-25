@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/KonnorFrik/getman/collections"
+	"github.com/KonnorFrik/getman/environment"
 	"github.com/KonnorFrik/getman/types"
 )
 
@@ -17,16 +19,16 @@ func CleanupTempDir(dir string) error {
 	return os.RemoveAll(dir)
 }
 
-func CreateTestCollection(name string, items []*types.RequestItem) *types.Collection {
-	return &types.Collection{
+func CreateTestCollection(name string, items []*types.RequestItem) *collections.Collection {
+	return &collections.Collection{
 		Name:        name,
 		Description: "Test collection",
 		Items:       items,
 	}
 }
 
-func CreateTestEnvironment(name string, variables map[string]string) *types.Environment {
-	return &types.Environment{
+func CreateTestEnvironment(name string, variables map[string]string) *environment.Environment {
+	return &environment.Environment{
 		Name:      name,
 		Variables: variables,
 	}

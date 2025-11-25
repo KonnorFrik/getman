@@ -3,14 +3,19 @@ package core
 import (
 	"testing"
 
-	"github.com/KonnorFrik/getman/variables"
+	"github.com/KonnorFrik/getman/environment"
 )
 
 func TestIntegrationResolve_InRequest(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("baseUrl", "http://example.com")
-	store.SetEnv("token", "testtoken123")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envL := environment.NewEnvironment("global")
+	envG.Set("baseUrl", "http://example.com")
+	envL.Set("token", "testtoken123")
+	resolver, err := NewVariableResolver(envG, envL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	url := "{{baseUrl}}/api/users"
 	resolvedURL, err := resolver.Resolve(url)
@@ -37,10 +42,15 @@ func TestIntegrationResolve_InRequest(t *testing.T) {
 }
 
 func TestIntegrationResolve_EnvPriority(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("testVar", "globalValue")
-	store.SetEnv("testVar", "envValue")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envL := environment.NewEnvironment("global")
+	envG.Set("testVar", "globalValue")
+	envL.Set("testVar", "envValue")
+	resolver, err := NewVariableResolver(envG, envL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	result, err := resolver.Resolve("{{testVar}}")
 	if err != nil {
@@ -53,12 +63,17 @@ func TestIntegrationResolve_EnvPriority(t *testing.T) {
 }
 
 func TestIntegrationResolve_ComplexTemplate(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("protocol", "https")
-	store.SetGlobal("host", "api.example.com")
-	store.SetGlobal("path", "users")
-	store.SetEnv("userId", "123")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envL := environment.NewEnvironment("global")
+	envG.Set("protocol", "https")
+	envG.Set("host", "api.example.com")
+	envG.Set("path", "users")
+	envL.Set("userId", "123")
+	resolver, err := NewVariableResolver(envG, envL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	template := "{{protocol}}://{{host}}/{{path}}/{{userId}}"
 	result, err := resolver.Resolve(template)
@@ -73,11 +88,16 @@ func TestIntegrationResolve_ComplexTemplate(t *testing.T) {
 }
 
 func TestIntegrationResolve_NestedVariables(t *testing.T) {
-	store := variables.NewVariableStore()
-	store.SetGlobal("baseUrl", "http://example.com")
-	store.SetEnv("apiPath", "/api/v1")
-	store.SetEnv("resource", "users")
-	resolver := NewVariableResolver(store)
+	envG := environment.NewEnvironment("global")
+	envL := environment.NewEnvironment("global")
+	envG.Set("baseUrl", "http://example.com")
+	envL.Set("apiPath", "/api/v1")
+	envL.Set("resource", "users")
+	resolver, err := NewVariableResolver(envG, envL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	template := "{{baseUrl}}{{apiPath}}/{{resource}}"
 	result, err := resolver.Resolve(template)

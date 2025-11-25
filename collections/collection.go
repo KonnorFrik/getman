@@ -10,13 +10,20 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
-func LoadCollectionFromFile(filePath string) (*types.Collection, error) {
+type Collection struct {
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	Items       []*types.RequestItem `json:"items"`
+	EnvName    string          `json:"environment_name"`
+}
+
+func LoadCollectionFromFile(filePath string) (*Collection, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read collection file: %w", err)
 	}
 
-	var collection types.Collection
+	var collection Collection
 	if err := json.Unmarshal(data, &collection); err != nil {
 		return nil, fmt.Errorf("failed to parse collection file: %w", err)
 	}
@@ -28,7 +35,7 @@ func LoadCollectionFromFile(filePath string) (*types.Collection, error) {
 	return &collection, nil
 }
 
-func SaveCollectionToFile(collection *types.Collection, filePath string) error {
+func SaveCollectionToFile(collection *Collection, filePath string) error {
 	if err := validateCollection(collection); err != nil {
 		return fmt.Errorf("invalid collection: %w", err)
 	}
@@ -50,7 +57,7 @@ func GetCollectionPath(fileStorage *storage.FileStorage, name string) string {
 	return filepath.Join(fileStorage.CollectionsDir(), filename)
 }
 
-func validateCollection(collection *types.Collection) error {
+func validateCollection(collection *Collection) error {
 	if collection.Name == "" {
 		return fmt.Errorf("collection name is required")
 	}

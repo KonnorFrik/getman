@@ -148,7 +148,7 @@ func TestIntegrationExecuteCollection_WithEnvironment(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if err := client.LoadEnvironment("test"); err != nil {
+	if err := client.LoadLocalEnvironment("test"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -249,7 +249,7 @@ func TestIntegrationVariableResolution(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if err := client.LoadEnvironment("test"); err != nil {
+	if err := client.LoadGlobalEnvironment(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -304,7 +304,7 @@ func TestIntegrationEnvironmentManagement(t *testing.T) {
 		t.Errorf("expected 2 environments, got %d", len(environments))
 	}
 
-	if err := client.LoadEnvironment("env1"); err != nil {
+	if err := client.LoadLocalEnvironment("env1"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

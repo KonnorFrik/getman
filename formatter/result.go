@@ -45,7 +45,7 @@ func FormatRequest(req *types.Request) string {
 		sb.WriteString("\nBody:\n")
 		var bodyStr string
 		if isJSON(req.Body.Content) {
-			var jsonObj interface{}
+			var jsonObj any
 			if err := json.Unmarshal(req.Body.Content, &jsonObj); err == nil {
 				prettyJSON, err := json.MarshalIndent(jsonObj, "", "  ")
 				if err == nil {
@@ -141,17 +141,6 @@ func FormatExecutionResult(result *types.ExecutionResult) string {
 }
 
 func PrintExecutionResult(result *types.ExecutionResult) {
-	fmt.Printf("Collection: %s\n", result.CollectionName)
-	fmt.Printf("Environment: %s\n", result.Environment)
-	fmt.Printf("Start Time: %s\n", result.StartTime.Format(time.RFC3339))
-	fmt.Printf("End Time: %s\n", result.EndTime.Format(time.RFC3339))
-	fmt.Printf("Total Duration: %v\n", result.TotalDuration)
-
-	if result.Statistics != nil {
-		fmt.Println("\nStatistics:")
-		PrintStatistics(result.Statistics)
-	}
-
 	fmt.Println("\nRequests:")
 
 	for i, req := range result.Requests {
@@ -190,6 +179,19 @@ func PrintExecutionResult(result *types.ExecutionResult) {
 			fmt.Printf("%s\n", string(req.Response.Body))
 		}
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("Collection: %s\n", result.CollectionName)
+	fmt.Printf("Environment: %s\n", result.Environment)
+	fmt.Printf("Start Time: %s\n", result.StartTime.Format(time.RFC3339))
+	fmt.Printf("End Time: %s\n", result.EndTime.Format(time.RFC3339))
+	fmt.Printf("Total Duration: %v\n", result.TotalDuration)
+
+	if result.Statistics != nil {
+		fmt.Println("\nStatistics:")
+		PrintStatistics(result.Statistics)
+	}
+
 }
 
 func FormatStatistics(stats *types.Statistics) string {

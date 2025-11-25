@@ -28,7 +28,7 @@ func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
 
 	executor := NewCollectionExecutor(httpClient, resolver)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -72,7 +72,7 @@ func TestIntegrationExecuteCollection_MultipleRequests(t *testing.T) {
 
 	executor := NewCollectionExecutor(httpClient, resolver)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -115,17 +115,16 @@ func TestIntegrationExecuteCollection_WithVariables(t *testing.T) {
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
+	env.Set("baseUrl", testutil.GetServerURL())
 	resolver, err := core.NewVariableResolver(env, nil)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env.Set("baseUrl", testutil.GetServerURL())
-	resolver := core.NewVariableResolver(store)
 	executor := NewCollectionExecutor(httpClient, resolver)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -160,11 +159,16 @@ func TestIntegrationExecuteCollection_WithAuth(t *testing.T) {
 	defer testutil.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
-	store := variables.NewVariableStore()
-	resolver := core.NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := core.NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	executor := NewCollectionExecutor(httpClient, resolver)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -204,11 +208,16 @@ func TestIntegrationExecuteCollection_Statistics(t *testing.T) {
 	defer testutil.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
-	store := variables.NewVariableStore()
-	resolver := core.NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := core.NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	executor := NewCollectionExecutor(httpClient, resolver)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
@@ -254,11 +263,16 @@ func TestIntegrationExecuteCollectionSelective(t *testing.T) {
 	defer testutil.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
-	store := variables.NewVariableStore()
-	resolver := core.NewVariableResolver(store)
+	env := environment.NewEnvironment("global")
+	resolver, err := core.NewVariableResolver(env, nil)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	executor := NewCollectionExecutor(httpClient, resolver)
 
-	collection := &types.Collection{
+	collection := &Collection{
 		Name: "Test Collection",
 		Items: []*types.RequestItem{
 			{
