@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/types"
 )
 
 func TestUnitNewLogStorage(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -35,11 +35,11 @@ func TestUnitNewLogStorage(t *testing.T) {
 }
 
 func TestUnitLogStorage_Save_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -76,11 +76,11 @@ func TestUnitLogStorage_Save_Valid(t *testing.T) {
 }
 
 func TestUnitLogStorage_Load_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -132,11 +132,11 @@ func TestUnitLogStorage_Load_Valid(t *testing.T) {
 }
 
 func TestUnitLogStorage_Load_NotFound(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -152,11 +152,11 @@ func TestUnitLogStorage_Load_NotFound(t *testing.T) {
 }
 
 func TestUnitLogStorage_GetLast_Exists(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -197,11 +197,11 @@ func TestUnitLogStorage_GetLast_Exists(t *testing.T) {
 }
 
 func TestUnitLogStorage_GetLast_NotFound(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -217,11 +217,11 @@ func TestUnitLogStorage_GetLast_NotFound(t *testing.T) {
 }
 
 func TestUnitLogStorage_GetLast_Empty(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -237,11 +237,11 @@ func TestUnitLogStorage_GetLast_Empty(t *testing.T) {
 }
 
 func TestUnitLogStorage_Save_MultipleLogs(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -295,11 +295,11 @@ func TestUnitLogStorage_Save_MultipleLogs(t *testing.T) {
 }
 
 func TestUnitLogStorage_GetLast_MultipleFiles(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -344,11 +344,11 @@ func TestUnitLogStorage_GetLast_MultipleFiles(t *testing.T) {
 }
 
 func TestUnitLogStorage_Load_IgnoreInvalidFiles(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {

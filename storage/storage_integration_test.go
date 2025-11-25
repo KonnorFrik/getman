@@ -6,16 +6,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/types"
 )
 
 func TestIntegrationFileStorage_FullCycle(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -53,11 +53,11 @@ func TestIntegrationFileStorage_FullCycle(t *testing.T) {
 }
 
 func TestIntegrationHistoryStorage_FullCycle(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -142,11 +142,11 @@ func TestIntegrationHistoryStorage_FullCycle(t *testing.T) {
 }
 
 func TestIntegrationLogStorage_FullCycle(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {
@@ -183,11 +183,11 @@ func TestIntegrationLogStorage_FullCycle(t *testing.T) {
 }
 
 func TestIntegrationStorage_ConcurrentAccess(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fs, err := NewFileStorage(dir)
 	if err != nil {

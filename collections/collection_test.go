@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	"github.com/KonnorFrik/getman/storage"
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/types"
 )
 
 func TestUnitLoadCollectionFromFile_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	collectionJSON := `{
 		"name": "Test Collection",
@@ -59,11 +59,11 @@ func TestUnitLoadCollectionFromFile_Valid(t *testing.T) {
 }
 
 func TestUnitLoadCollectionFromFile_InvalidJSON(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	filePath := filepath.Join(dir, "test.json")
 	if err := os.WriteFile(filePath, []byte("invalid json"), 0644); err != nil {
@@ -84,11 +84,11 @@ func TestUnitLoadCollectionFromFile_FileNotFound(t *testing.T) {
 }
 
 func TestUnitLoadCollectionFromFile_InvalidCollection(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	collectionJSON := `{
 		"name": "",
@@ -107,11 +107,11 @@ func TestUnitLoadCollectionFromFile_InvalidCollection(t *testing.T) {
 }
 
 func TestUnitSaveCollectionToFile_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	collection := &Collection{
 		Name:        "Test Collection",
@@ -147,11 +147,11 @@ func TestUnitSaveCollectionToFile_Valid(t *testing.T) {
 }
 
 func TestUnitSaveCollectionToFile_InvalidCollection(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	collection := &Collection{
 		Name:  "",
@@ -234,11 +234,11 @@ func TestUnitValidateCollection_MissingRequest(t *testing.T) {
 }
 
 func TestUnitGetCollectionPath(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	fileStorage, err := storage.NewFileStorage(dir)
 	if err != nil {
@@ -273,11 +273,11 @@ func TestUnitValidateCollection_EmptyItems(t *testing.T) {
 }
 
 func TestUnitLoadCollectionFromFile_MultipleItems(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	collectionJSON := `{
 		"name": "Test Collection",
@@ -323,11 +323,11 @@ func TestUnitLoadCollectionFromFile_MultipleItems(t *testing.T) {
 }
 
 func TestUnitSaveCollectionToFile_EmptyItems(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	collection := &Collection{
 		Name:  "Test Collection",

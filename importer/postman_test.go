@@ -5,17 +5,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
+	"github.com/KonnorFrik/getman/testutil/fixture"
 )
 
 func TestUnitImportFromPostman_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
-	postmanJSON := testutil.GetTestPostmanCollectionJSON()
+	postmanJSON := fixture.GetTestPostmanCollectionJSON()
 
 	filePath := filepath.Join(dir, "postman.json")
 	if err := os.WriteFile(filePath, []byte(postmanJSON), 0644); err != nil {
@@ -37,11 +38,11 @@ func TestUnitImportFromPostman_Valid(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_InvalidJSON(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	filePath := filepath.Join(dir, "postman.json")
 	if err := os.WriteFile(filePath, []byte("invalid json"), 0644); err != nil {
@@ -62,11 +63,11 @@ func TestUnitImportFromPostman_FileNotFound(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithHeaders(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -121,11 +122,11 @@ func TestUnitImportFromPostman_WithHeaders(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithBody_RAW(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -178,11 +179,11 @@ func TestUnitImportFromPostman_WithBody_RAW(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithBody_FormData(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -240,11 +241,11 @@ func TestUnitImportFromPostman_WithBody_FormData(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithBody_URLEncoded(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -298,11 +299,11 @@ func TestUnitImportFromPostman_WithBody_URLEncoded(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithBasicAuth(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -368,11 +369,11 @@ func TestUnitImportFromPostman_WithBasicAuth(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithBearerAuth(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -430,11 +431,11 @@ func TestUnitImportFromPostman_WithBearerAuth(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_WithAPIKeyAuth(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -508,11 +509,11 @@ func TestUnitImportFromPostman_WithAPIKeyAuth(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_NestedItems(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -570,11 +571,11 @@ func TestUnitImportFromPostman_NestedItems(t *testing.T) {
 }
 
 func TestUnitImportFromPostman_APIKeyAuth_QueryLocation(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {

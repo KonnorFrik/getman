@@ -6,17 +6,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
+	"github.com/KonnorFrik/getman/testutil/fixture"
 )
 
 func TestUnitLoadConfig_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
-	configYAML := testutil.GetTestConfigYAML()
+	configYAML := fixture.GetTestConfigYAML()
 
 	filePath := filepath.Join(dir, "config.yaml")
 	if err := os.WriteFile(filePath, []byte(configYAML), 0644); err != nil {
@@ -34,11 +35,11 @@ func TestUnitLoadConfig_Valid(t *testing.T) {
 }
 
 func TestUnitLoadConfig_InvalidYAML(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	filePath := filepath.Join(dir, "config.yaml")
 	if err := os.WriteFile(filePath, []byte("invalid: yaml: ["), 0644); err != nil {
@@ -59,11 +60,11 @@ func TestUnitLoadConfig_FileNotFound(t *testing.T) {
 }
 
 func TestUnitLoadConfig_InvalidConfig(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	configYAML := `storage:
   base_path: ""
@@ -92,11 +93,11 @@ logging:
 }
 
 func TestUnitSaveConfig_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	config := DefaultConfig()
 
@@ -120,11 +121,11 @@ func TestUnitSaveConfig_Valid(t *testing.T) {
 }
 
 func TestUnitSaveConfig_InvalidConfig(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	config := &Config{
 		Storage: StorageConfig{

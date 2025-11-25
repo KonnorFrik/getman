@@ -1,5 +1,7 @@
 package getman
 
+// TOOD: move it into dir client/
+
 import (
 	"encoding/json"
 	"fmt"

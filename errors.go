@@ -2,6 +2,7 @@ package getman
 
 import "github.com/KonnorFrik/getman/errors"
 
+// TODO: delete it
 var (
 	ErrEnvironmentNotFound = errors.ErrEnvironmentNotFound
 	ErrCollectionNotFound  = errors.ErrCollectionNotFound

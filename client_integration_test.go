@@ -4,22 +4,24 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/http_server"
+	"github.com/KonnorFrik/getman/testutil/helper"
+	"github.com/KonnorFrik/getman/testutil/fixture"
 	"github.com/KonnorFrik/getman/types"
 )
 
 func TestIntegrationExecuteRequest(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -28,7 +30,7 @@ func TestIntegrationExecuteRequest(t *testing.T) {
 
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/health",
+		URL:    http_server.GetServerURL() + "/health",
 	}
 
 	execution, err := client.ExecuteRequest(req)
@@ -46,24 +48,24 @@ func TestIntegrationExecuteRequest(t *testing.T) {
 }
 
 func TestIntegrationExecuteRequest_WithVariables(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	client.SetGlobalVariable("baseUrl", testutil.GetServerURL())
+	client.SetGlobalVariable("baseUrl", http_server.GetServerURL())
 
 	req := &types.Request{
 		Method: http.MethodGet,
@@ -81,29 +83,29 @@ func TestIntegrationExecuteRequest_WithVariables(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_FullFlow(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection := testutil.CreateTestCollection("Test Collection", []*types.RequestItem{
+	collection := fixture.CreateTestCollection("Test Collection", []*types.RequestItem{
 		{
 			Name: "Test Request",
 			Request: &types.Request{
 				Method: http.MethodGet,
-				URL:    testutil.GetServerURL() + "/health",
+				URL:    http_server.GetServerURL() + "/health",
 			},
 		},
 	})
@@ -123,25 +125,25 @@ func TestIntegrationExecuteCollection_FullFlow(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_WithEnvironment(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env := testutil.CreateTestEnvironment("test", map[string]string{
-		"baseUrl": testutil.GetServerURL(),
+	env := fixture.CreateTestEnvironment("test", map[string]string{
+		"baseUrl": http_server.GetServerURL(),
 	})
 
 	if err := client.SaveEnvironment(env); err != nil {
@@ -152,7 +154,7 @@ func TestIntegrationExecuteCollection_WithEnvironment(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection := testutil.CreateTestCollection("Test Collection", []*types.RequestItem{
+	collection := fixture.CreateTestCollection("Test Collection", []*types.RequestItem{
 		{
 			Name: "Test Request",
 			Request: &types.Request{
@@ -177,29 +179,29 @@ func TestIntegrationExecuteCollection_WithEnvironment(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_History(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection := testutil.CreateTestCollection("Test Collection", []*types.RequestItem{
+	collection := fixture.CreateTestCollection("Test Collection", []*types.RequestItem{
 		{
 			Name: "Test Request",
 			Request: &types.Request{
 				Method: http.MethodGet,
-				URL:    testutil.GetServerURL() + "/health",
+				URL:    http_server.GetServerURL() + "/health",
 			},
 		},
 	})
@@ -228,11 +230,11 @@ func TestIntegrationExecuteCollection_History(t *testing.T) {
 }
 
 func TestIntegrationVariableResolution(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -241,7 +243,7 @@ func TestIntegrationVariableResolution(t *testing.T) {
 
 	client.SetGlobalVariable("globalVar", "globalValue")
 
-	env := testutil.CreateTestEnvironment("test", map[string]string{
+	env := fixture.CreateTestEnvironment("test", map[string]string{
 		"envVar": "envValue",
 	})
 
@@ -273,19 +275,19 @@ func TestIntegrationVariableResolution(t *testing.T) {
 }
 
 func TestIntegrationEnvironmentManagement(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env1 := testutil.CreateTestEnvironment("env1", map[string]string{"key1": "value1"})
-	env2 := testutil.CreateTestEnvironment("env2", map[string]string{"key2": "value2"})
+	env1 := fixture.CreateTestEnvironment("env1", map[string]string{"key1": "value1"})
+	env2 := fixture.CreateTestEnvironment("env2", map[string]string{"key2": "value2"})
 
 	if err := client.SaveEnvironment(env1); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -332,19 +334,19 @@ func TestIntegrationEnvironmentManagement(t *testing.T) {
 }
 
 func TestIntegrationCollectionManagement(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection1 := testutil.CreateTestCollection("collection1", []*types.RequestItem{})
-	collection2 := testutil.CreateTestCollection("collection2", []*types.RequestItem{})
+	collection1 := fixture.CreateTestCollection("collection1", []*types.RequestItem{})
+	collection2 := fixture.CreateTestCollection("collection2", []*types.RequestItem{})
 
 	if err := client.SaveCollection(collection1); err != nil {
 		t.Fatalf("unexpected error: %v", err)

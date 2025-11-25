@@ -5,15 +5,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
 )
 
 func TestUnitLoadEnvironmentFromFile_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	envJSON := `{
 		"name": "test",
@@ -47,11 +47,11 @@ func TestUnitLoadEnvironmentFromFile_Valid(t *testing.T) {
 }
 
 func TestUnitLoadEnvironmentFromFile_InvalidJSON(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	filePath := filepath.Join(dir, "test.json")
 	if err := os.WriteFile(filePath, []byte("invalid json"), 0644); err != nil {
@@ -72,11 +72,11 @@ func TestUnitLoadEnvironmentFromFile_FileNotFound(t *testing.T) {
 }
 
 func TestUnitLoadEnvironmentFromFile_InvalidEnvironment(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	envJSON := `{
 		"name": "",
@@ -95,11 +95,11 @@ func TestUnitLoadEnvironmentFromFile_InvalidEnvironment(t *testing.T) {
 }
 
 func TestUnitSaveEnvironmentToFile_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	env := &Environment{
 		Name: "test",
@@ -133,13 +133,13 @@ func TestUnitSaveEnvironmentToFile_Valid(t *testing.T) {
 }
 
 func TestUnitSaveEnvironmentToFile_InvalidEnvironment(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
 
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	env := &Environment{
 		Name:      "",
@@ -195,11 +195,11 @@ func TestUnitValidateEnvironment_NilVariables(t *testing.T) {
 }
 
 func TestUnitLoadEnvironmentFromFile_EmptyVariables(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	envJSON := `{
 		"name": "test",
@@ -226,11 +226,11 @@ func TestUnitLoadEnvironmentFromFile_EmptyVariables(t *testing.T) {
 }
 
 func TestUnitSaveEnvironmentToFile_EmptyVariables(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	env := &Environment{
 		Name:      "test",

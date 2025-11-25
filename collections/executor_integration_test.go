@@ -6,17 +6,17 @@ import (
 	"time"
 
 	"github.com/KonnorFrik/getman/core"
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/http_server"
 	"github.com/KonnorFrik/getman/types"
 	"github.com/KonnorFrik/getman/environment"
 )
 
 func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
@@ -35,7 +35,7 @@ func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
 				Name: "Test Request",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 		},
@@ -56,11 +56,11 @@ func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_MultipleRequests(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
@@ -79,14 +79,14 @@ func TestIntegrationExecuteCollection_MultipleRequests(t *testing.T) {
 				Name: "Request 1",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 			{
 				Name: "Request 2",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 		},
@@ -107,15 +107,15 @@ func TestIntegrationExecuteCollection_MultipleRequests(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_WithVariables(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
-	env.Set("baseUrl", testutil.GetServerURL())
+	env.Set("baseUrl", http_server.GetServerURL())
 	resolver, err := core.NewVariableResolver(env, nil)
 
 	if err != nil {
@@ -152,11 +152,11 @@ func TestIntegrationExecuteCollection_WithVariables(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_WithAuth(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
@@ -175,7 +175,7 @@ func TestIntegrationExecuteCollection_WithAuth(t *testing.T) {
 				Name: "Test Request",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/auth/basic",
+					URL:    http_server.GetServerURL() + "/auth/basic",
 					Auth: &types.Auth{
 						Type:     "basic",
 						Username: "testuser",
@@ -201,11 +201,11 @@ func TestIntegrationExecuteCollection_WithAuth(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollection_Statistics(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
@@ -224,14 +224,14 @@ func TestIntegrationExecuteCollection_Statistics(t *testing.T) {
 				Name: "Request 1",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 			{
 				Name: "Request 2",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 		},
@@ -256,11 +256,11 @@ func TestIntegrationExecuteCollection_Statistics(t *testing.T) {
 }
 
 func TestIntegrationExecuteCollectionSelective(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	httpClient := core.NewHTTPClient(10*time.Second, 30*time.Second, false)
 	env := environment.NewEnvironment("global")
@@ -279,14 +279,14 @@ func TestIntegrationExecuteCollectionSelective(t *testing.T) {
 				Name: "Request 1",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 			{
 				Name: "Request 2",
 				Request: &types.Request{
 					Method: http.MethodGet,
-					URL:    testutil.GetServerURL() + "/health",
+					URL:    http_server.GetServerURL() + "/health",
 				},
 			},
 		},

@@ -5,21 +5,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/http_server"
 	"github.com/KonnorFrik/getman/types"
 )
 
 func TestIntegrationExecute_GET(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/health",
+		URL:    http_server.GetServerURL() + "/health",
 	}
 
 	resp, err := client.Execute(req)
@@ -33,16 +33,16 @@ func TestIntegrationExecute_GET(t *testing.T) {
 }
 
 func TestIntegrationExecute_POST(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodPost,
-		URL:    testutil.GetServerURL() + "/echo",
+		URL:    http_server.GetServerURL() + "/echo",
 		Body: &types.RequestBody{
 			Type:        "raw",
 			Content:     []byte("test body"),
@@ -61,16 +61,16 @@ func TestIntegrationExecute_POST(t *testing.T) {
 }
 
 func TestIntegrationExecute_WithHeaders(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/headers",
+		URL:    http_server.GetServerURL() + "/headers",
 		Headers: map[string]string{
 			"X-Custom-Header": "test-value",
 		},
@@ -87,16 +87,16 @@ func TestIntegrationExecute_WithHeaders(t *testing.T) {
 }
 
 func TestIntegrationExecute_WithBody(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodPost,
-		URL:    testutil.GetServerURL() + "/body",
+		URL:    http_server.GetServerURL() + "/body",
 		Body: &types.RequestBody{
 			Type:        "raw",
 			Content:     []byte("test body content"),
@@ -115,16 +115,16 @@ func TestIntegrationExecute_WithBody(t *testing.T) {
 }
 
 func TestIntegrationExecute_WithBasicAuth(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/auth/basic",
+		URL:    http_server.GetServerURL() + "/auth/basic",
 		Auth: &types.Auth{
 			Type:     "basic",
 			Username: "testuser",
@@ -143,16 +143,16 @@ func TestIntegrationExecute_WithBasicAuth(t *testing.T) {
 }
 
 func TestIntegrationExecute_WithBearerAuth(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/auth/bearer",
+		URL:    http_server.GetServerURL() + "/auth/bearer",
 		Auth: &types.Auth{
 			Type:  "bearer",
 			Token: "testtoken",
@@ -170,16 +170,16 @@ func TestIntegrationExecute_WithBearerAuth(t *testing.T) {
 }
 
 func TestIntegrationExecute_WithAPIKeyAuth(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/auth/apikey",
+		URL:    http_server.GetServerURL() + "/auth/apikey",
 		Auth: &types.Auth{
 			Type:     "apikey",
 			APIKey:   "testapikey",
@@ -199,16 +199,16 @@ func TestIntegrationExecute_WithAPIKeyAuth(t *testing.T) {
 }
 
 func TestIntegrationExecute_WithCookies(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, true)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/cookies",
+		URL:    http_server.GetServerURL() + "/cookies",
 	}
 
 	resp, err := client.Execute(req)
@@ -222,11 +222,11 @@ func TestIntegrationExecute_WithCookies(t *testing.T) {
 }
 
 func TestIntegrationExecute_StatusCode(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 
@@ -242,7 +242,7 @@ func TestIntegrationExecute_StatusCode(t *testing.T) {
 	for _, tt := range tests {
 		req := &types.Request{
 			Method: http.MethodGet,
-			URL:    testutil.GetServerURL() + tt.url,
+			URL:    http_server.GetServerURL() + tt.url,
 		}
 
 		resp, err := client.Execute(req)
@@ -257,16 +257,16 @@ func TestIntegrationExecute_StatusCode(t *testing.T) {
 }
 
 func TestIntegrationExecute_ResponseHeaders(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/headers",
+		URL:    http_server.GetServerURL() + "/headers",
 	}
 
 	resp, err := client.Execute(req)
@@ -280,16 +280,16 @@ func TestIntegrationExecute_ResponseHeaders(t *testing.T) {
 }
 
 func TestIntegrationExecute_ResponseBody(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
 	client := NewHTTPClient(10*time.Second, 30*time.Second, false)
 	req := &types.Request{
 		Method: http.MethodGet,
-		URL:    testutil.GetServerURL() + "/health",
+		URL:    http_server.GetServerURL() + "/health",
 	}
 
 	resp, err := client.Execute(req)

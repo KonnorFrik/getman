@@ -6,16 +6,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
+	"github.com/KonnorFrik/getman/testutil/fixture"
 	"github.com/KonnorFrik/getman/types"
 )
 
 func TestUnitNewClient_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -39,18 +40,18 @@ func TestUnitNewClientWithDefaults(t *testing.T) {
 }
 
 func TestUnitLoadEnvironment(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env := testutil.CreateTestEnvironment("test", map[string]string{
+	env := fixture.CreateTestEnvironment("test", map[string]string{
 		"key1": "value1",
 	})
 
@@ -58,7 +59,7 @@ func TestUnitLoadEnvironment(t *testing.T) {
 		t.Fatalf("unexpected error saving environment: %v", err)
 	}
 
-	if err := client.LoadEnvironment("test"); err != nil {
+	if err := client.LoadLocalEnvironment("test"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -73,36 +74,36 @@ func TestUnitLoadEnvironment(t *testing.T) {
 }
 
 func TestUnitLoadEnvironment_NotFound(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	err = client.LoadEnvironment("nonexistent")
+	err = client.LoadLocalEnvironment("nonexistent")
 	if err == nil {
 		t.Fatal("expected error for nonexistent environment")
 	}
 }
 
 func TestUnitSaveEnvironment(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env := testutil.CreateTestEnvironment("test", map[string]string{
+	env := fixture.CreateTestEnvironment("test", map[string]string{
 		"key1": "value1",
 	})
 
@@ -112,19 +113,19 @@ func TestUnitSaveEnvironment(t *testing.T) {
 }
 
 func TestUnitListEnvironments(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env1 := testutil.CreateTestEnvironment("env1", map[string]string{})
-	env2 := testutil.CreateTestEnvironment("env2", map[string]string{})
+	env1 := fixture.CreateTestEnvironment("env1", map[string]string{})
+	env2 := fixture.CreateTestEnvironment("env2", map[string]string{})
 
 	if err := client.SaveEnvironment(env1); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -145,18 +146,18 @@ func TestUnitListEnvironments(t *testing.T) {
 }
 
 func TestUnitDeleteEnvironment(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	env := testutil.CreateTestEnvironment("test", map[string]string{})
+	env := fixture.CreateTestEnvironment("test", map[string]string{})
 
 	if err := client.SaveEnvironment(env); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -168,11 +169,11 @@ func TestUnitDeleteEnvironment(t *testing.T) {
 }
 
 func TestUnitSetGlobalVariable(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -192,11 +193,11 @@ func TestUnitSetGlobalVariable(t *testing.T) {
 }
 
 func TestUnitGetVariable(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -216,11 +217,11 @@ func TestUnitGetVariable(t *testing.T) {
 }
 
 func TestUnitResolveVariables(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -240,18 +241,18 @@ func TestUnitResolveVariables(t *testing.T) {
 }
 
 func TestUnitLoadCollection(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection := testutil.CreateTestCollection("test", []*types.RequestItem{
+	collection := fixture.CreateTestCollection("test", []*types.RequestItem{
 		{
 			Name: "Test Request",
 			Request: &types.Request{
@@ -276,11 +277,11 @@ func TestUnitLoadCollection(t *testing.T) {
 }
 
 func TestUnitLoadCollection_NotFound(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -294,18 +295,18 @@ func TestUnitLoadCollection_NotFound(t *testing.T) {
 }
 
 func TestUnitSaveCollection(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection := testutil.CreateTestCollection("test", []*types.RequestItem{
+	collection := fixture.CreateTestCollection("test", []*types.RequestItem{
 		{
 			Name: "Test Request",
 			Request: &types.Request{
@@ -321,19 +322,19 @@ func TestUnitSaveCollection(t *testing.T) {
 }
 
 func TestUnitListCollections(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection1 := testutil.CreateTestCollection("collection1", []*types.RequestItem{})
-	collection2 := testutil.CreateTestCollection("collection2", []*types.RequestItem{})
+	collection1 := fixture.CreateTestCollection("collection1", []*types.RequestItem{})
+	collection2 := fixture.CreateTestCollection("collection2", []*types.RequestItem{})
 
 	if err := client.SaveCollection(collection1); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -354,18 +355,18 @@ func TestUnitListCollections(t *testing.T) {
 }
 
 func TestUnitDeleteCollection(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	collection := testutil.CreateTestCollection("test", []*types.RequestItem{})
+	collection := fixture.CreateTestCollection("test", []*types.RequestItem{})
 
 	if err := client.SaveCollection(collection); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -377,11 +378,11 @@ func TestUnitDeleteCollection(t *testing.T) {
 }
 
 func TestUnitValidateRequest_Valid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -399,11 +400,11 @@ func TestUnitValidateRequest_Valid(t *testing.T) {
 }
 
 func TestUnitValidateRequest_Invalid(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -428,11 +429,11 @@ func TestUnitExecuteRequest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -459,11 +460,11 @@ func TestUnitExecuteRequest(t *testing.T) {
 }
 
 func TestUnitGetHistory(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -494,7 +495,7 @@ func TestUnitGetHistory(t *testing.T) {
 						AutoManage: true,
 					},
 				},
-				Response: testutil.CreateTestResponse(200, []byte("TestBody")),
+				Response: fixture.CreateTestResponse(200, []byte("TestBody")),
 				Duration: time.Microsecond * 150,
 				Timestamp: time.Now(),
 			},
@@ -524,11 +525,11 @@ func TestUnitGetHistory(t *testing.T) {
 }
 
 func TestUnitGetConfig(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {
@@ -542,11 +543,11 @@ func TestUnitGetConfig(t *testing.T) {
 }
 
 func TestUnitUpdateConfig(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	client, err := NewClient(dir)
 	if err != nil {

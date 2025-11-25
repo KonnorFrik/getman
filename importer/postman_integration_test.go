@@ -5,17 +5,19 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil"
+	"github.com/KonnorFrik/getman/testutil/helper"
+	"github.com/KonnorFrik/getman/testutil/fixture"
+	"github.com/KonnorFrik/getman/testutil/http_server"
 )
 
 func TestIntegrationImportFromPostman_RealFile(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
-	postmanJSON := testutil.GetTestPostmanCollectionJSON()
+	postmanJSON := fixture.GetTestPostmanCollectionJSON()
 
 	filePath := filepath.Join(dir, "postman.json")
 	if err := os.WriteFile(filePath, []byte(postmanJSON), 0644); err != nil {
@@ -37,17 +39,17 @@ func TestIntegrationImportFromPostman_RealFile(t *testing.T) {
 }
 
 func TestIntegrationImportFromPostman_ExecuteImported(t *testing.T) {
-	_, err := testutil.StartTestServer()
+	_, err := http_server.StartTestServer()
 	if err != nil {
 		t.Fatalf("failed to start test server: %v", err)
 	}
-	defer testutil.StopTestServer()
+	defer http_server.StopTestServer()
 
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
@@ -60,7 +62,7 @@ func TestIntegrationImportFromPostman_ExecuteImported(t *testing.T) {
 				"request": {
 					"method": "GET",
 					"url": {
-						"raw": "` + testutil.GetServerURL() + `/health"
+						"raw": "` + http_server.GetServerURL() + `/health"
 					}
 				}
 			}
@@ -81,17 +83,17 @@ func TestIntegrationImportFromPostman_ExecuteImported(t *testing.T) {
 		t.Fatalf("expected 1 item, got %d", len(collection.Items))
 	}
 
-	if collection.Items[0].Request.URL != testutil.GetServerURL()+"/health" {
-		t.Errorf("expected URL %s/health, got %s", testutil.GetServerURL(), collection.Items[0].Request.URL)
+	if collection.Items[0].Request.URL != http_server.GetServerURL()+"/health" {
+		t.Errorf("expected URL %s/health, got %s", http_server.GetServerURL(), collection.Items[0].Request.URL)
 	}
 }
 
 func TestIntegrationImportFromPostman_ComplexCollection(t *testing.T) {
-	dir, err := testutil.CreateTempDir()
+	dir, err := helper.CreateTempDir()
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer testutil.CleanupTempDir(dir)
+	defer helper.CleanupTempDir(dir)
 
 	postmanJSON := `{
 		"info": {
