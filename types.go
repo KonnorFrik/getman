@@ -6,7 +6,6 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
-// TODO: move in client.go or delete it
 type Request = types.Request
 type RequestBody = types.RequestBody
 type Auth = types.Auth
