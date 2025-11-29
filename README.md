@@ -1,12 +1,14 @@
 # getman
 
-Библиотека для работы с HTTP запросами, коллекциями и окружениями в Go.
+CLI программа для работы с HTTP запросами, коллекциями и окружениями в Go.
 
 ## Установка
 
 ```bash
-go get github.com/KonnorFrik/getman
+go get github.com/KonnorFrik/getman@cli_cobra_latest
 ```
+
+# TODO: rewrite readme for cli 
 
 ## Быстрый старт
 
