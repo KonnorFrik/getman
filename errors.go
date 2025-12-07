@@ -10,4 +10,5 @@ var (
 	ErrInvalidURL          = errors.ErrInvalidURL
 	ErrRequestFailed       = errors.ErrRequestFailed
 	ErrStorageError        = errors.ErrStorageError
+	ErrInvalidArgument     = errors.ErrInvalidArgument
 )
