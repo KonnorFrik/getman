@@ -54,6 +54,7 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 		}
 
 		getman.PrintExecutionResult(result)
+		println()
 	}
 }
 
@@ -69,5 +70,4 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	runCmd.Flags().StringVar(&dirFlag, "dir", ".getman", "Use specific getman directory.")
 }
