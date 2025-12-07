@@ -25,31 +25,34 @@ var listCmd = &cobra.Command{
 }
 
 func _ListCmd(cmd *cobra.Command, args []string) {
-	fmt.Println("list called")
-	fmt.Printf("use dir: %s\n", dirFlag)
+	if dirFlag == "" {
+		PrintfCobraError(cmd, "Flag 'dir' cannot be empty")
+		return
+	}
+
 	pathStat, err := os.Stat(dirFlag)
 
 	if err != nil {
-		PrintfCobraError(cmd, "%s\n", err)
+		PrintfError("%s\n", err)
 		return
 	}
 
 	if !pathStat.IsDir() {
-		PrintfCobraError(cmd, "not a directory: %s\n", dirFlag)
+		PrintfError("Not a directory: %s\n", dirFlag)
 		return
 	}
 
 	client, err := getman.NewClient(dirFlag)
 
 	if err != nil {
-		PrintfCobraError(cmd, "NewClient: %s\n", err)
+		PrintfError("NewClient: %s\n", err)
 		return
 	}
 
 	collectionNames, err := client.ListCollections()
 
 	if err != nil {
-		PrintfCobraError(cmd, "ListCollections: %s\n", err)
+		PrintfError("ListCollections: %s\n", err)
 		return
 	}
 

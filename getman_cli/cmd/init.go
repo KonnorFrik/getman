@@ -14,18 +14,15 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Init a base directory with name as 'dir'",
+	Short: "Init a base directory with name 'dir'",
 	Long: ``,
 	Args: cobra.NoArgs,
 	Run: _InitCmd,
 }
 
 func _InitCmd(cmd *cobra.Command, args []string) {
-	// check if folder with 'dirFlag' exist
-	println("init run")
-
 	if dirFlag == "" {
-		PrintfError("Flag 'dir' cannot be empty")
+		PrintfCobraError(cmd, "Flag 'dir' cannot be empty")
 		return
 	}
 
@@ -48,8 +45,6 @@ func _InitCmd(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// create new dir, use 'dirFlag' as name for folder
-	fmt.Printf("Create a dir: %q\n", dirFlag)
 	_, err = getman.NewClient(dirFlag)
 
 	if err != nil {

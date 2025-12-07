@@ -4,7 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/KonnorFrik/getman"
@@ -23,9 +22,11 @@ var runCmd = &cobra.Command{
 var dirFlag string
 
 func _RunCmd(cmd *cobra.Command, args []string) {
-	fmt.Println("run called")
-	fmt.Printf("args: %v\n", args)
-	fmt.Printf("use dir: %s\n", dirFlag)
+	if dirFlag == "" {
+		PrintfCobraError(cmd, "Flag 'dir' cannot be empty")
+		return
+	}
+
 	pathStat, err := os.Stat(dirFlag)
 
 	if err != nil {
@@ -41,7 +42,7 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 	client, err := getman.NewClient(dirFlag)
 
 	if err != nil {
-		PrintfCobraError(cmd, "NewClient: %s\n", err)
+		PrintfError("NewClient: %s\n", err)
 		return
 	}
 
