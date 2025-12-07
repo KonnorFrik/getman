@@ -157,7 +157,7 @@ func (c *Client) SaveEnvironment(env *Environment) error {
 		return fmt.Errorf("%w: 'env' is nil", ErrInvalidArgument)
 	}
 
-	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
+	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", env.Name))
 	err := env.Save(filePath)
 
 	if err != nil {
