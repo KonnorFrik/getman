@@ -30,12 +30,12 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 	pathStat, err := os.Stat(dirFlag)
 
 	if err != nil {
-		PrintfCobraError(cmd, "%s\n", err)
+		PrintfError("%s\n", err)
 		return
 	}
 
 	if !pathStat.IsDir() {
-		PrintfCobraError(cmd, "not a directory: %s\n", dirFlag)
+		PrintfError("not a directory: %s\n", dirFlag)
 		return
 	}
 
