@@ -1,6 +1,10 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 */
+
+/*
+list all collections from storage.
+*/
 package cmd
 
 import (
