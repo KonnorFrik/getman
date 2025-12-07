@@ -128,38 +128,48 @@ func (c *Client) LoadGlobalEnvironment() error {
 	return nil
 }
 
+// SaveEnvironments - save both local and global environments into 'basePath' storage.
 func (c *Client) SaveEnvironments() error {
-	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
-	err := c.env.Save(filePath)
+	if c.env != nil {
+		filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
+		err := c.env.Save(filePath)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
-	globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
-	err = c.globalEnv.Save(globalFilePath)
+	if c.globalEnv != nil {
+		globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
+		err := c.globalEnv.Save(globalFilePath)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
+// SaveEnvironment - save given environment into 'basePath' storage.
 func (c *Client) SaveEnvironment(env *Environment) error {
+	if env == nil {
+		return fmt.Errorf("%w: 'env' is nil", ErrInvalidArgument)
+	}
+
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
-	err := c.env.Save(filePath)
+	err := env.Save(filePath)
 
 	if err != nil {
 		return err
 	}
 
-	globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
-	err = c.globalEnv.Save(globalFilePath)
-
-	if err != nil {
-		return err
-	}
+	// globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
+	// err = c.globalEnv.Save(globalFilePath)
+	//
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
