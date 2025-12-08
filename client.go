@@ -1,3 +1,6 @@
+/*
+Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
+*/
 package getman
 
 import (
@@ -10,11 +13,11 @@ import (
 
 	"github.com/KonnorFrik/getman/collections"
 	"github.com/KonnorFrik/getman/core"
+	"github.com/KonnorFrik/getman/environment"
 	"github.com/KonnorFrik/getman/formatter"
 	"github.com/KonnorFrik/getman/importer"
 	"github.com/KonnorFrik/getman/storage"
 	"github.com/KonnorFrik/getman/types"
-	"github.com/KonnorFrik/getman/environment"
 )
 
 type Client struct {
@@ -26,7 +29,7 @@ type Client struct {
 	variableResolver   *core.VariableResolver
 	env                *environment.Environment
 	globalEnv          *environment.Environment
-	config *Config
+	config             *Config
 }
 
 const globalEnvName = "global"
