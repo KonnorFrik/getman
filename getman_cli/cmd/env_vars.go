@@ -11,7 +11,7 @@ import (
 
 // varsCmd represents the vars command
 var varsCmd = &cobra.Command{
-	Use:   "vars",
+	Use:   "vars <env> ...<env>",
 	Short: "show all variables stored in specified environment",
 	Long: ``,
 	Args: cobra.MinimumNArgs(1),
@@ -39,12 +39,12 @@ func _EnvVarsCmd(cmd *cobra.Command, args []string) {
 		fmt.Printf("%s:\n", name)
 
 		if len(env.Variables) == 0 {
-			fmt.Printf("\tEmpty\n")
+			fmt.Printf("\tEmpty.\n")
 			continue
 		}
 
 		for k, v := range env.Variables {
-			fmt.Printf("\t%s: %s\n", k, v)
+			fmt.Printf("\t%s=%s\n", k, v)
 		}
 
 		println()

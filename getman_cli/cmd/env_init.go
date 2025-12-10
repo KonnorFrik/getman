@@ -11,8 +11,8 @@ import (
 
 // envInitCmd represents the init command
 var envInitCmd = &cobra.Command{
-	Use:   "init ...",
-	Short: "create a init environment",
+	Use:   "init <name> ...<name>",
+	Short: "Create a new environment",
 	Long: ``,
 	Args: cobra.MinimumNArgs(1),
 	Run: _EnvInitCmd,
