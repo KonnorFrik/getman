@@ -16,18 +16,19 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// HistoryStorage provides storage for request execution history.
 type HistoryStorage struct {
 	fileStorage *FileStorage
 }
 
+// NewHistoryStorage creates a new HistoryStorage instance.
 func NewHistoryStorage(fileStorage *FileStorage) *HistoryStorage {
 	return &HistoryStorage{
 		fileStorage: fileStorage,
 	}
 }
 
-// Save - save 'result' into file with path "<base_path>/<getman_dir>/history/<timestamp>.json
-// If file exist - it will be overwrited.
+// Save saves an execution result to a timestamped JSON file. If the file exists, it will be overwritten.
 func (hs *HistoryStorage) Save(result *types.ExecutionResult) error {
 	timestamp := FormatTimestamp(time.Now())
 	filename := fmt.Sprintf("%s.json", timestamp)
@@ -47,6 +48,7 @@ func (hs *HistoryStorage) Save(result *types.ExecutionResult) error {
 	return nil
 }
 
+// Load loads an execution result by timestamp.
 func (hs *HistoryStorage) Load(timestamp string) (*types.ExecutionResult, error) {
 	filename := fmt.Sprintf("%s.json", timestamp)
 	filePath := filepath.Join(hs.fileStorage.HistoryDir(), filename)
@@ -64,6 +66,7 @@ func (hs *HistoryStorage) Load(timestamp string) (*types.ExecutionResult, error)
 	return &result, nil
 }
 
+// List returns all available history timestamps, sorted in reverse chronological order.
 func (hs *HistoryStorage) List() ([]string, error) {
 	dir := hs.fileStorage.HistoryDir()
 	entries, err := os.ReadDir(dir)
@@ -94,6 +97,7 @@ func (hs *HistoryStorage) List() ([]string, error) {
 	return timestamps, nil
 }
 
+// GetLast returns the most recent execution result.
 func (hs *HistoryStorage) GetLast() (*types.ExecutionResult, error) {
 	timestamps, err := hs.List()
 	if err != nil {
@@ -107,6 +111,7 @@ func (hs *HistoryStorage) GetLast() (*types.ExecutionResult, error) {
 	return hs.Load(timestamps[0])
 }
 
+// GetHistory retrieves request executions from history up to the specified limit.
 func (hs *HistoryStorage) GetHistory(limit int) ([]*types.RequestExecution, error) {
 	timestamps, err := hs.List()
 
@@ -133,6 +138,7 @@ func (hs *HistoryStorage) GetHistory(limit int) ([]*types.RequestExecution, erro
 	return allExecutions, nil
 }
 
+// Clear removes all stored history files.
 func (hs *HistoryStorage) Clear() error {
 	dir := hs.fileStorage.HistoryDir()
 	entries, err := os.ReadDir(dir)

@@ -6,6 +6,7 @@ package types
 
 import "time"
 
+// Request represents an HTTP request.
 type Request struct {
 	Method  string            `json:"method"`
 	URL     string            `json:"url"`
@@ -16,12 +17,14 @@ type Request struct {
 	Cookies *CookieSettings   `json:"cookies,omitempty"`
 }
 
+// RequestBody represents the body of an HTTP request.
 type RequestBody struct {
 	Type        string `json:"type"`
 	Content     []byte `json:"content"`
 	ContentType string `json:"content_type,omitempty"`
 }
 
+// Auth represents authentication configuration for a request.
 type Auth struct {
 	Type     string `json:"type"`
 	Username string `json:"username,omitempty"`
@@ -32,15 +35,18 @@ type Auth struct {
 	Location string `json:"location,omitempty"`
 }
 
+// Timeout represents timeout settings for an HTTP request.
 type Timeout struct {
 	Connect time.Duration `json:"connect"`
 	Read    time.Duration `json:"read"`
 }
 
+// CookieSettings represents cookie management settings for a request.
 type CookieSettings struct {
 	AutoManage bool `json:"auto_manage"`
 }
 
+// Response represents an HTTP response.
 type Response struct {
 	StatusCode int                 `json:"status_code"`
 	Status     string              `json:"status"`
@@ -50,11 +56,13 @@ type Response struct {
 	Size       int64               `json:"size"`
 }
 
+// RequestItem represents a named request item in a collection.
 type RequestItem struct {
 	Name    string   `json:"name"`
 	Request *Request `json:"request"`
 }
 
+// RequestExecution represents the result of executing a single request.
 type RequestExecution struct {
 	Request   *Request      `json:"request"`
 	Response  *Response     `json:"response,omitempty"`
@@ -63,6 +71,7 @@ type RequestExecution struct {
 	Timestamp time.Time     `json:"timestamp"`
 }
 
+// ExecutionResult represents the result of executing a collection of requests.
 type ExecutionResult struct {
 	CollectionName string              `json:"collection_name"`
 	Environment    string              `json:"environment"`
@@ -73,6 +82,7 @@ type ExecutionResult struct {
 	Statistics     *Statistics         `json:"statistics"`
 }
 
+// Statistics contains execution statistics for a collection run.
 type Statistics struct {
 	Total   int           `json:"total"`
 	Success int           `json:"success"`
@@ -82,6 +92,7 @@ type Statistics struct {
 	MaxTime time.Duration `json:"max_time"`
 }
 
+// LogEntry represents a single log entry.
 type LogEntry struct {
 	Time    time.Time `json:"time"`
 	Level   string    `json:"level"`

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package core
 
@@ -17,11 +16,13 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// HTTPClient provides functionality for executing HTTP requests.
 type HTTPClient struct {
 	client     *http.Client
 	autoManage bool
 }
 
+// NewHTTPClient creates a new HTTPClient with the specified timeouts and cookie management settings.
 func NewHTTPClient(connectTimeout, readTimeout time.Duration, autoManageCookies bool) *HTTPClient {
 	transport := &http.Transport{
 		ResponseHeaderTimeout: connectTimeout,
@@ -59,6 +60,7 @@ func (j *cookieJarImpl) Cookies(u *url.URL) []*http.Cookie {
 	return j.cookies[u.Host]
 }
 
+// Execute performs an HTTP request and returns the response.
 func (hc *HTTPClient) Execute(req *types.Request) (*types.Response, error) {
 	startTime := time.Now()
 

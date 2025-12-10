@@ -19,6 +19,7 @@ var (
 	colorFgCyan = color.New(color.FgHiCyan)
 )
 
+// FormatRequest formats a request as a string for display.
 func FormatRequest(req *types.Request) string {
 	var sb strings.Builder
 
@@ -70,6 +71,7 @@ func FormatRequest(req *types.Request) string {
 	return sb.String()
 }
 
+// PrintRequest prints a formatted request to stdout.
 func PrintRequest(req *types.Request) {
 	fmt.Printf("%s %s\n", req.Method, req.URL)
 
@@ -116,6 +118,7 @@ func PrintRequest(req *types.Request) {
 	}
 }
 
+// FormatExecutionResult formats an execution result as a string for display.
 func FormatExecutionResult(result *types.ExecutionResult) string {
 	var sb strings.Builder
 
@@ -144,6 +147,7 @@ func FormatExecutionResult(result *types.ExecutionResult) string {
 	return sb.String()
 }
 
+// PrintExecutionResult prints a formatted execution result to stdout with color coding.
 func PrintExecutionResult(result *types.ExecutionResult) {
 	fmt.Println("\nRequests:")
 
@@ -198,6 +202,7 @@ func PrintExecutionResult(result *types.ExecutionResult) {
 
 }
 
+// FormatStatistics formats statistics as a string for display.
 func FormatStatistics(stats *types.Statistics) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("  Total: %d\n", stats.Total))
@@ -209,6 +214,7 @@ func FormatStatistics(stats *types.Statistics) string {
 	return sb.String()
 }
 
+// PrintStatistics prints formatted statistics to stdout with color coding.
 func PrintStatistics(stats *types.Statistics) {
 	fmt.Printf("  Total: %d\n", stats.Total)
 	color.Green("  Success: %d\n", stats.Success)

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package core
 
@@ -13,6 +12,7 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// RequestBuilder provides a fluent interface for building HTTP requests.
 type RequestBuilder struct {
 	method  string
 	url     string
@@ -23,22 +23,26 @@ type RequestBuilder struct {
 	cookies *types.CookieSettings
 }
 
+// NewRequestBuilder creates a new RequestBuilder instance.
 func NewRequestBuilder() *RequestBuilder {
 	return &RequestBuilder{
 		headers: make(map[string]string),
 	}
 }
 
+// Method sets the HTTP method for the request.
 func (b *RequestBuilder) Method(method string) *RequestBuilder {
 	b.method = method
 	return b
 }
 
+// URL sets the request URL.
 func (b *RequestBuilder) URL(url string) *RequestBuilder {
 	b.url = url
 	return b
 }
 
+// Header adds a single header to the request.
 func (b *RequestBuilder) Header(key, value string) *RequestBuilder {
 	if b.headers == nil {
 		b.headers = make(map[string]string)
@@ -47,6 +51,7 @@ func (b *RequestBuilder) Header(key, value string) *RequestBuilder {
 	return b
 }
 
+// Headers sets multiple headers for the request.
 func (b *RequestBuilder) Headers(headers map[string]string) *RequestBuilder {
 	if b.headers == nil {
 		b.headers = make(map[string]string)
@@ -57,6 +62,7 @@ func (b *RequestBuilder) Headers(headers map[string]string) *RequestBuilder {
 	return b
 }
 
+// BodyJSON sets the request body as JSON.
 func (b *RequestBuilder) BodyJSON(data interface{}) *RequestBuilder {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -71,6 +77,7 @@ func (b *RequestBuilder) BodyJSON(data interface{}) *RequestBuilder {
 	return b
 }
 
+// BodyXML sets the request body as XML.
 func (b *RequestBuilder) BodyXML(data string) *RequestBuilder {
 	xmlData, err := xml.Marshal(data)
 	if err != nil {
@@ -85,6 +92,7 @@ func (b *RequestBuilder) BodyXML(data string) *RequestBuilder {
 	return b
 }
 
+// BodyRaw sets the request body as raw bytes with the specified content type.
 func (b *RequestBuilder) BodyRaw(data []byte, contentType string) *RequestBuilder {
 	b.body = &types.RequestBody{
 		Type:        "raw",
@@ -94,6 +102,7 @@ func (b *RequestBuilder) BodyRaw(data []byte, contentType string) *RequestBuilde
 	return b
 }
 
+// BodyBinary sets the request body as binary data with the specified content type.
 func (b *RequestBuilder) BodyBinary(data []byte, contentType string) *RequestBuilder {
 	b.body = &types.RequestBody{
 		Type:        "binary",
@@ -103,6 +112,7 @@ func (b *RequestBuilder) BodyBinary(data []byte, contentType string) *RequestBui
 	return b
 }
 
+// AuthBasic sets Basic authentication credentials.
 func (b *RequestBuilder) AuthBasic(username, password string) *RequestBuilder {
 	b.auth = &types.Auth{
 		Type:     "basic",
@@ -112,6 +122,7 @@ func (b *RequestBuilder) AuthBasic(username, password string) *RequestBuilder {
 	return b
 }
 
+// AuthBearer sets Bearer token authentication.
 func (b *RequestBuilder) AuthBearer(token string) *RequestBuilder {
 	b.auth = &types.Auth{
 		Type:  "bearer",
@@ -120,6 +131,7 @@ func (b *RequestBuilder) AuthBearer(token string) *RequestBuilder {
 	return b
 }
 
+// AuthAPIKey sets API key authentication with the specified key name, value, and location.
 func (b *RequestBuilder) AuthAPIKey(keyName, keyValue, location string) *RequestBuilder {
 	b.auth = &types.Auth{
 		Type:     "apikey",
@@ -130,6 +142,7 @@ func (b *RequestBuilder) AuthAPIKey(keyName, keyValue, location string) *Request
 	return b
 }
 
+// Timeout sets connection and read timeouts for the request.
 func (b *RequestBuilder) Timeout(connect, read time.Duration) *RequestBuilder {
 	b.timeout = &types.Timeout{
 		Connect: connect,
@@ -138,6 +151,7 @@ func (b *RequestBuilder) Timeout(connect, read time.Duration) *RequestBuilder {
 	return b
 }
 
+// CookiesAutoManage enables or disables automatic cookie management.
 func (b *RequestBuilder) CookiesAutoManage(autoManage bool) *RequestBuilder {
 	b.cookies = &types.CookieSettings{
 		AutoManage: autoManage,
@@ -145,6 +159,7 @@ func (b *RequestBuilder) CookiesAutoManage(autoManage bool) *RequestBuilder {
 	return b
 }
 
+// Build constructs and returns the final Request object.
 func (b *RequestBuilder) Build() (*types.Request, error) {
 	if b.method == "" {
 		return nil, fmt.Errorf("method is required")
