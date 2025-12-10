@@ -15,17 +15,20 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// PostmanCollection represents a Postman collection structure.
 type PostmanCollection struct {
 	Info PostmanInfo   `json:"info"`
 	Item []PostmanItem `json:"item"`
 }
 
+// PostmanInfo contains metadata about a Postman collection.
 type PostmanInfo struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	Schema      string `json:"schema"`
 }
 
+// PostmanItem represents an item in a Postman collection (can be a request or a folder).
 type PostmanItem struct {
 	Name     string          `json:"name"`
 	Request  *PostmanRequest `json:"request,omitempty"`
@@ -33,6 +36,7 @@ type PostmanItem struct {
 	Response []interface{}   `json:"response,omitempty"`
 }
 
+// PostmanRequest represents a request in a Postman collection.
 type PostmanRequest struct {
 	Method string          `json:"method"`
 	Header []PostmanHeader `json:"header"`
@@ -41,11 +45,13 @@ type PostmanRequest struct {
 	Auth   *PostmanAuth    `json:"auth,omitempty"`
 }
 
+// PostmanHeader represents a header in a Postman request.
 type PostmanHeader struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
+// PostmanBody represents the body of a Postman request.
 type PostmanBody struct {
 	Mode       string              `json:"mode"`
 	Raw        string              `json:"raw,omitempty"`
@@ -53,17 +59,20 @@ type PostmanBody struct {
 	Urlencoded []PostmanURLEncoded `json:"urlencoded,omitempty"`
 }
 
+// PostmanFormData represents a form data field in a Postman request.
 type PostmanFormData struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 	Type  string `json:"type,omitempty"`
 }
 
+// PostmanURLEncoded represents a URL-encoded form field in a Postman request.
 type PostmanURLEncoded struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
+// PostmanURL represents a URL structure in a Postman request.
 type PostmanURL struct {
 	Raw      string         `json:"raw"`
 	Protocol string         `json:"protocol,omitempty"`
@@ -72,11 +81,13 @@ type PostmanURL struct {
 	Query    []PostmanQuery `json:"query,omitempty"`
 }
 
+// PostmanQuery represents a query parameter in a Postman URL.
 type PostmanQuery struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
+// PostmanAuth represents authentication settings in a Postman request.
 type PostmanAuth struct {
 	Type   string             `json:"type"`
 	Basic  []PostmanAuthField `json:"basic,omitempty"`
@@ -84,12 +95,14 @@ type PostmanAuth struct {
 	Apikey []PostmanAuthField `json:"apikey,omitempty"`
 }
 
+// PostmanAuthField represents a field in Postman authentication configuration.
 type PostmanAuthField struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 	Type  string `json:"type,omitempty"`
 }
 
+// ImportFromPostman imports a Postman collection from a JSON file and converts it to a Collection.
 func ImportFromPostman(filePath string) (*collections.Collection, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {

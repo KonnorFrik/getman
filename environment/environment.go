@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package environment
 
@@ -12,19 +11,21 @@ import (
 	"sync"
 )
 
+// Environment represents a collection of variables that can be used for request templating.
 type Environment struct {
-	mu sync.RWMutex
+	mu        sync.RWMutex
 	Name      string            `json:"name"`
 	Variables map[string]string `json:"variables"`
 }
 
+// NewEnvironment creates a new Environment instance with the specified name.
 func NewEnvironment(name string) *Environment {
 	return &Environment{
 		Name: name,
 	}
 }
 
-// NewEnvironmentFromFile - load env directly from file.
+// NewEnvironmentFromFile loads an environment directly from a JSON file.
 func NewEnvironmentFromFile(filepath string) (*Environment, error) {
 	data, err := os.ReadFile(filepath)
 
@@ -44,16 +45,14 @@ func NewEnvironmentFromFile(filepath string) (*Environment, error) {
 	return &env, nil
 }
 
-// Set - save a pair key-value in environment 'e'.
-// if key already exist - it will be overwriten.
-func (e *Environment) Set(key, value string) { 
+// Set saves a key-value pair in the environment. If the key already exists, it will be overwritten.
+func (e *Environment) Set(key, value string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.Variables[key] = value
 }
 
-// Get - return a value binded with a 'key'.
-// if key don't exist - reutrn zero-value and false.
+// Get returns the value associated with a key. If the key doesn't exist, it returns the zero value and false.
 func (e *Environment) Get(key string) (string, bool) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
@@ -61,19 +60,21 @@ func (e *Environment) Get(key string) (string, bool) {
 	return value, ok
 }
 
-// Clear - delete all environment 'e'.
+// Clear removes all variables from the environment.
 func (e *Environment) Clear() {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.Variables = make(map[string]string)
 }
 
+// Delete removes a variable from the environment by key.
 func (e *Environment) Delete(key string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	delete(e.Variables, key)
 }
 
+// CopyMap returns a copy of all variables in the environment.
 func (e *Environment) CopyMap() map[string]string {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -82,7 +83,7 @@ func (e *Environment) CopyMap() map[string]string {
 	return result
 }
 
-// Load - overwrite 'e' with data from 'filepath'.
+// Load overwrites the environment with data from a JSON file.
 func (e *Environment) Load(filepath string) error {
 	data, err := os.ReadFile(filepath)
 
@@ -104,8 +105,7 @@ func (e *Environment) Load(filepath string) error {
 	return nil
 }
 
-// Save - save environment 'e' into file.
-// if file exist - it will be overwriten.
+// Save saves the environment to a JSON file. If the file exists, it will be overwritten.
 func (e *Environment) Save(filepath string) error {
 	if err := validateEnvironment(e); err != nil {
 		return fmt.Errorf("invalid environment: %w", err)

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package getman
 
@@ -12,35 +11,42 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Config represents the application configuration.
 type Config struct {
 	Storage  StorageConfig  `yaml:"storage"`
 	Defaults DefaultsConfig `yaml:"defaults"`
 	Logging  LoggingConfig  `yaml:"logging"`
 }
 
+// StorageConfig contains storage-related configuration settings.
 type StorageConfig struct {
 	BasePath string `yaml:"base_path"`
 }
 
+// DefaultsConfig contains default settings for requests.
 type DefaultsConfig struct {
 	Timeout TimeoutConfig `yaml:"timeout"`
 	Cookies CookiesConfig `yaml:"cookies"`
 }
 
+// TimeoutConfig contains timeout settings for HTTP requests.
 type TimeoutConfig struct {
 	Connect time.Duration `yaml:"connect"`
 	Read    time.Duration `yaml:"read"`
 }
 
+// CookiesConfig contains cookie management settings.
 type CookiesConfig struct {
 	AutoManage bool `yaml:"auto_manage"`
 }
 
+// LoggingConfig contains logging configuration settings.
 type LoggingConfig struct {
 	Level  string `yaml:"level"`
 	Format string `yaml:"format"`
 }
 
+// LoadConfig loads configuration from a YAML file.
 func LoadConfig(configPath string) (*Config, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -59,6 +65,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &config, nil
 }
 
+// SaveConfig saves configuration to a YAML file.
 func SaveConfig(config *Config, configPath string) error {
 	if err := validateConfig(config); err != nil {
 		return fmt.Errorf("invalid config: %w", err)
@@ -76,6 +83,7 @@ func SaveConfig(config *Config, configPath string) error {
 	return nil
 }
 
+// DefaultConfig returns a configuration with default values.
 func DefaultConfig() *Config {
 	return &Config{
 		Storage: StorageConfig{

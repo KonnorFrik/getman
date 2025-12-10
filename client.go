@@ -20,20 +20,27 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// Client represents the main client for interacting with the getman library.
+// It provides methods for managing collections, environments, executing requests,
+// and handling storage operations.
 type Client struct {
 	storage            *storage.FileStorage
 	historyStorage     *storage.HistoryStorage
 	logStorage         *storage.LogStorage
 	httpClient         *core.HTTPClient
 	collectionExecutor *collections.CollectionExecutor
-	variableResolver   *core.VariableResolver
-	env                *environment.Environment
-	globalEnv          *environment.Environment
-	config             *Config
+	// TODO: delete env and globalEnv from Client and use 'variableResolver' instead.
+	variableResolver *core.VariableResolver
+	env              *environment.Environment
+	globalEnv        *environment.Environment
+	config           *Config
 }
 
 const globalEnvName = "global"
 
+// NewClient creates a new Client instance with the specified base path for storage.
+// It initializes all required components including file storage, history storage,
+// log storage, HTTP client, and variable resolver.
 func NewClient(basePath string) (*Client, error) {
 	var client Client
 	fileStorage, err := storage.NewFileStorage(basePath)
@@ -84,7 +91,7 @@ func NewClient(basePath string) (*Client, error) {
 	return &client, nil
 }
 
-// NewClientWithConfig создает новый клиент с конфигурацией из файла
+// NewClientWithConfig creates a new Client instance using configuration from the specified file.
 func NewClientWithConfig(configPath string) (*Client, error) {
 	config, err := LoadConfig(configPath)
 	if err != nil {
@@ -94,7 +101,7 @@ func NewClientWithConfig(configPath string) (*Client, error) {
 	return NewClient(config.Storage.BasePath)
 }
 
-// NewClientWithDefaults создает клиента с путями по умолчанию (~/.getman)
+// NewClientWithDefaults creates a Client instance with default paths (~/.getman).
 func NewClientWithDefaults() (*Client, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -105,6 +112,7 @@ func NewClientWithDefaults() (*Client, error) {
 	return NewClient(basePath)
 }
 
+// LoadLocalEnvironment loads a local environment by name from storage.
 func (c *Client) LoadLocalEnvironment(name string) error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", name))
 	env, err := environment.NewEnvironmentFromFile(filePath)
@@ -118,6 +126,7 @@ func (c *Client) LoadLocalEnvironment(name string) error {
 	return nil
 }
 
+// LoadGlobalEnvironment loads the global environment from storage.
 func (c *Client) LoadGlobalEnvironment() error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", globalEnvName))
 	env, err := environment.NewEnvironmentFromFile(filePath)
@@ -131,7 +140,7 @@ func (c *Client) LoadGlobalEnvironment() error {
 	return nil
 }
 
-// SaveEnvironments - save both local and global environments into 'basePath' storage.
+// SaveEnvironments saves both local and global environments to storage.
 func (c *Client) SaveEnvironments() error {
 	if c.env != nil {
 		filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
@@ -154,7 +163,7 @@ func (c *Client) SaveEnvironments() error {
 	return nil
 }
 
-// SaveEnvironment - save given environment into 'basePath' storage.
+// SaveEnvironment saves the given environment to storage.
 func (c *Client) SaveEnvironment(env *Environment) error {
 	if env == nil {
 		return fmt.Errorf("%w: 'env' is nil", ErrInvalidArgument)
@@ -177,6 +186,7 @@ func (c *Client) SaveEnvironment(env *Environment) error {
 	return nil
 }
 
+// ListEnvironments returns a list of all available environment names.
 func (c *Client) ListEnvironments() ([]string, error) {
 	dir := c.storage.EnvironmentsDir()
 	entries, err := os.ReadDir(dir)
@@ -202,6 +212,7 @@ func (c *Client) ListEnvironments() ([]string, error) {
 	return names, nil
 }
 
+// DeleteEnvironment deletes an environment by name.
 func (c *Client) DeleteEnvironment(name string) error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", name))
 
@@ -212,30 +223,37 @@ func (c *Client) DeleteEnvironment(name string) error {
 	return nil
 }
 
+// GetCurrentEnvironment returns the currently loaded local environment.
 func (c *Client) GetCurrentEnvironment() *environment.Environment {
 	return c.env
 }
 
+// SetGlobalVariable sets a variable in the global environment.
 func (c *Client) SetGlobalVariable(key, value string) {
 	c.globalEnv.Set(key, value)
 }
 
+// GetGlobalVariable retrieves a variable value from the global environment.
 func (c *Client) GetGlobalVariable(key string) (string, bool) {
 	return c.globalEnv.Get(key)
 }
 
+// SetVariable sets a variable in the current local environment.
 func (c *Client) SetVariable(key, value string) {
 	c.env.Set(key, value)
 }
 
+// GetVariable retrieves a variable value from the current local environment.
 func (c *Client) GetVariable(key string) (string, bool) {
 	return c.env.Get(key)
 }
 
+// ResolveVariables resolves variables in the given template string using the current environment.
 func (c *Client) ResolveVariables(template string) (string, error) {
 	return c.variableResolver.Resolve(template)
 }
 
+// LoadCollection loads a collection by name from storage.
 func (c *Client) LoadCollection(name string) (*collections.Collection, error) {
 	filePath := collections.GetCollectionPath(c.storage, name)
 	collection, err := collections.LoadCollectionFromFile(filePath)
@@ -259,11 +277,13 @@ func (c *Client) LoadCollection(name string) (*collections.Collection, error) {
 	return collection, nil
 }
 
+// SaveCollection saves a collection to storage.
 func (c *Client) SaveCollection(collection *collections.Collection) error {
 	filePath := collections.GetCollectionPath(c.storage, collection.Name)
 	return collections.SaveCollectionToFile(collection, filePath)
 }
 
+// ListCollections returns a list of all available collection names.
 func (c *Client) ListCollections() ([]string, error) {
 	dir := c.storage.CollectionsDir()
 	entries, err := os.ReadDir(dir)
@@ -285,6 +305,7 @@ func (c *Client) ListCollections() ([]string, error) {
 	return names, nil
 }
 
+// DeleteCollection deletes a collection by name.
 func (c *Client) DeleteCollection(name string) error {
 	filePath := collections.GetCollectionPath(c.storage, name)
 	if err := os.Remove(filePath); err != nil {
@@ -293,10 +314,12 @@ func (c *Client) DeleteCollection(name string) error {
 	return nil
 }
 
+// ImportFromPostman imports a Postman collection from the specified file path.
 func (c *Client) ImportFromPostman(filePath string) (*collections.Collection, error) {
 	return importer.ImportFromPostman(filePath)
 }
 
+// ExportToPostman exports a collection to a Postman-compatible JSON file.
 func (c *Client) ExportToPostman(collection *collections.Collection, filePath string) error {
 	data, err := json.MarshalIndent(collection, "", "  ")
 	if err != nil {
@@ -310,6 +333,7 @@ func (c *Client) ExportToPostman(collection *collections.Collection, filePath st
 	return nil
 }
 
+// ExecuteRequest executes a single HTTP request and returns the execution result.
 func (c *Client) ExecuteRequest(req *types.Request) (*types.RequestExecution, error) {
 	if err := c.ValidateRequest(req); err != nil {
 		return nil, err
@@ -339,6 +363,7 @@ func (c *Client) ExecuteRequest(req *types.Request) (*types.RequestExecution, er
 	return execution, nil
 }
 
+// ExecuteCollection executes all requests in a collection by name.
 func (c *Client) ExecuteCollection(collectionName string) (*types.ExecutionResult, error) {
 	collection, err := c.LoadCollection(collectionName)
 	if err != nil {
@@ -353,6 +378,7 @@ func (c *Client) ExecuteCollection(collectionName string) (*types.ExecutionResul
 	return c.collectionExecutor.ExecuteCollection(collection, envName)
 }
 
+// ExecuteCollectionSelective executes only the specified requests from a collection.
 func (c *Client) ExecuteCollectionSelective(collectionName string, itemNames []string) (*types.ExecutionResult, error) {
 	collection, err := c.LoadCollection(collectionName)
 	if err != nil {
@@ -367,6 +393,7 @@ func (c *Client) ExecuteCollectionSelective(collectionName string, itemNames []s
 	return c.collectionExecutor.ExecuteCollectionSelective(collection, envName, itemNames)
 }
 
+// ValidateRequest validates a request before execution, checking method, URL, and variables.
 func (c *Client) ValidateRequest(req *types.Request) error {
 	if req.Method == "" {
 		return fmt.Errorf("%w: method is required", ErrInvalidRequest)
@@ -397,34 +424,42 @@ func (c *Client) ValidateRequest(req *types.Request) error {
 	return nil
 }
 
+// GetHistory retrieves request execution history up to the specified limit.
 func (c *Client) GetHistory(limit int) ([]*types.RequestExecution, error) {
 	return c.historyStorage.GetHistory(limit)
 }
 
+// GetLastExecution retrieves the most recent execution result.
 func (c *Client) GetLastExecution() (*types.ExecutionResult, error) {
 	return c.historyStorage.GetLast()
 }
 
+// GetLogs retrieves the most recent log entries as JSON bytes.
 func (c *Client) GetLogs() ([]byte, error) {
 	return c.logStorage.GetLast()
 }
 
+// ClearHistory removes all stored execution history.
 func (c *Client) ClearHistory() error {
 	return c.historyStorage.Clear()
 }
 
+// SaveHistory saves an execution result to history storage.
 func (c *Client) SaveHistory(result *types.ExecutionResult) error {
 	return c.historyStorage.Save(result)
 }
 
+// SaveLogs saves log entries to storage.
 func (c *Client) SaveLogs(logs []types.LogEntry) error {
 	return c.logStorage.Save(logs)
 }
 
+// GetConfig returns the current client configuration.
 func (c *Client) GetConfig() *Config {
 	return c.config
 }
 
+// UpdateConfig updates the client configuration and saves it to storage.
 func (c *Client) UpdateConfig(config *Config) error {
 	if err := validateConfig(config); err != nil {
 		return err
@@ -510,30 +545,37 @@ func (c *Client) resolveRequest(req *types.Request) (*types.Request, error) {
 	return resolvedReq, nil
 }
 
+// NewRequestBuilder creates a new RequestBuilder instance for constructing HTTP requests.
 func NewRequestBuilder() *core.RequestBuilder {
 	return core.NewRequestBuilder()
 }
 
+// FormatResponse formats a response as a string for display.
 func FormatResponse(resp *types.Response) string {
 	return formatter.FormatResponse(resp)
 }
 
+// FormatRequest formats a request as a string for display.
 func FormatRequest(req *types.Request) string {
 	return formatter.FormatRequest(req)
 }
 
+// FormatExecutionResult formats an execution result as a string for display.
 func FormatExecutionResult(result *types.ExecutionResult) string {
 	return formatter.FormatExecutionResult(result)
 }
 
+// FormatStatistics formats statistics as a string for display.
 func FormatStatistics(stats *types.Statistics) string {
 	return formatter.FormatStatistics(stats)
 }
 
+// PrintResponse prints a formatted response to stdout.
 func PrintResponse(resp *types.Response) {
 	formatter.PrintResponse(resp)
 }
 
+// PrintRequest prints a formatted request to stdout.
 func PrintRequest(req *types.Request) {
 	formatter.PrintRequest(req)
 }

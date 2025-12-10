@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package collections
 
@@ -12,11 +11,13 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// CollectionExecutor executes collections of HTTP requests.
 type CollectionExecutor struct {
 	httpClient       *core.HTTPClient
 	variableResolver *core.VariableResolver
 }
 
+// NewCollectionExecutor creates a new CollectionExecutor instance.
 func NewCollectionExecutor(httpClient *core.HTTPClient, variableResolver *core.VariableResolver) *CollectionExecutor {
 	return &CollectionExecutor{
 		httpClient:       httpClient,
@@ -24,10 +25,12 @@ func NewCollectionExecutor(httpClient *core.HTTPClient, variableResolver *core.V
 	}
 }
 
+// ExecuteCollection executes all requests in a collection.
 func (ce *CollectionExecutor) ExecuteCollection(collection *Collection, environment string) (*types.ExecutionResult, error) {
 	return ce.ExecuteCollectionSelective(collection, environment, nil)
 }
 
+// ExecuteCollectionSelective executes only the specified requests from a collection.
 func (ce *CollectionExecutor) ExecuteCollectionSelective(collection *Collection, environment string, itemNames []string) (*types.ExecutionResult, error) {
 	startTime := time.Now()
 

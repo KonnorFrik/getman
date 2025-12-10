@@ -13,6 +13,7 @@ import (
 	"github.com/fatih/color"
 )
 
+// FormatResponse formats a response as a string for display.
 func FormatResponse(resp *types.Response) string {
 	var sb strings.Builder
 
@@ -52,6 +53,7 @@ func FormatResponse(resp *types.Response) string {
 	return sb.String()
 }
 
+// PrintResponse prints a formatted response to stdout with color coding.
 func PrintResponse(resp *types.Response) {
 	var statusColor *color.Color
 	switch {
