@@ -22,6 +22,7 @@ type Environment struct {
 func NewEnvironment(name string) *Environment {
 	return &Environment{
 		Name: name,
+		Variables: make(map[string]string),
 	}
 }
 

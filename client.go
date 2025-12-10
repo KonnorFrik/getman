@@ -29,10 +29,7 @@ type Client struct {
 	logStorage         *storage.LogStorage
 	httpClient         *core.HTTPClient
 	collectionExecutor *collections.CollectionExecutor
-	// TODO: delete env and globalEnv from Client and use 'variableResolver' instead.
 	variableResolver *core.VariableResolver
-	env              *environment.Environment
-	globalEnv        *environment.Environment
 	config           *Config
 }
 
@@ -42,7 +39,11 @@ const globalEnvName = "global"
 // It initializes all required components including file storage, history storage,
 // log storage, HTTP client, and variable resolver.
 func NewClient(basePath string) (*Client, error) {
-	var client Client
+	var (
+		client Client
+		globalEnv = environment.NewEnvironment(globalEnvName)
+	)
+
 	fileStorage, err := storage.NewFileStorage(basePath)
 
 	if err != nil {
@@ -63,17 +64,17 @@ func NewClient(basePath string) (*Client, error) {
 
 	historyStorage := storage.NewHistoryStorage(fileStorage)
 	logStorage := storage.NewLogStorage(fileStorage)
-	err = client.LoadGlobalEnvironment()
-
-	if err != nil {
-		client.globalEnv = environment.NewEnvironment(globalEnvName)
-	}
-
-	variableResolver, err := core.NewVariableResolver(client.globalEnv, nil)
+	variableResolver, err := core.NewVariableResolver(globalEnv, nil)
 
 	if err != nil {
 		return nil, err
 	}
+
+	client.LoadGlobalEnvironment()
+
+	// if err != nil {
+	// 	variableResolver.SetGlobal(globalEnv)
+	// }
 
 	connectTimeout := config.Defaults.Timeout.Connect
 	readTimeout := config.Defaults.Timeout.Read
@@ -121,7 +122,7 @@ func (c *Client) LoadLocalEnvironment(name string) error {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, name)
 	}
 
-	c.env = env
+	// c.env = env
 	c.variableResolver.SetLocal(env)
 	return nil
 }
@@ -135,25 +136,30 @@ func (c *Client) LoadGlobalEnvironment() error {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, globalEnvName)
 	}
 
-	c.env = env
+	// c.globalEnv = env
 	c.variableResolver.SetGlobal(env)
 	return nil
 }
 
 // SaveEnvironments saves both local and global environments to storage.
 func (c *Client) SaveEnvironments() error {
-	if c.env != nil {
-		filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.env.Name))
-		err := c.env.Save(filePath)
+	var (
+		localEnv = c.variableResolver.GetLocal()
+		globalEnv = c.variableResolver.GetGlobal()
+	)
+
+	if localEnv != nil {
+		filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", localEnv.Name))
+		err := localEnv.Save(filePath)
 
 		if err != nil {
 			return err
 		}
 	}
 
-	if c.globalEnv != nil {
-		globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
-		err := c.globalEnv.Save(globalFilePath)
+	if globalEnv != nil {
+		filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", globalEnv.Name))
+		err := globalEnv.Save(filePath)
 
 		if err != nil {
 			return err
@@ -225,27 +231,64 @@ func (c *Client) DeleteEnvironment(name string) error {
 
 // GetCurrentEnvironment returns the currently loaded local environment.
 func (c *Client) GetCurrentEnvironment() *environment.Environment {
-	return c.env
+	return c.variableResolver.GetLocal()
 }
 
 // SetGlobalVariable sets a variable in the global environment.
 func (c *Client) SetGlobalVariable(key, value string) {
-	c.globalEnv.Set(key, value)
+	env := c.variableResolver.GetGlobal()
+
+	if env != nil {
+		env.Set(key, value)
+	}
 }
 
 // GetGlobalVariable retrieves a variable value from the global environment.
 func (c *Client) GetGlobalVariable(key string) (string, bool) {
-	return c.globalEnv.Get(key)
+	env := c.variableResolver.GetGlobal()
+	var (
+		result string
+		ok     bool
+	)
+
+	if env != nil {
+		result, ok = env.Get(key)
+	}
+
+	return result, ok
 }
 
 // SetVariable sets a variable in the current local environment.
 func (c *Client) SetVariable(key, value string) {
-	c.env.Set(key, value)
+	env := c.variableResolver.GetLocal()
+
+	if env != nil {
+		env.Set(key, value)
+	}
 }
 
-// GetVariable retrieves a variable value from the current local environment.
+// GetVariable retrieves a variable value from the current local environment
+// If key not exists, retrieves a variable value from the global environment.
 func (c *Client) GetVariable(key string) (string, bool) {
-	return c.env.Get(key)
+	env := c.variableResolver.GetLocal()
+	var (
+		result string
+		ok     bool
+	)
+
+	if env != nil {
+		result, ok = env.Get(key)
+	}
+
+	if !ok {
+		env = c.variableResolver.GetGlobal()
+
+		if env != nil {
+			result, ok = env.Get(key)
+		}
+	}
+
+	return result, ok
 }
 
 // ResolveVariables resolves variables in the given template string using the current environment.
@@ -366,31 +409,37 @@ func (c *Client) ExecuteRequest(req *types.Request) (*types.RequestExecution, er
 // ExecuteCollection executes all requests in a collection by name.
 func (c *Client) ExecuteCollection(collectionName string) (*types.ExecutionResult, error) {
 	collection, err := c.LoadCollection(collectionName)
+
 	if err != nil {
 		return nil, err
 	}
 
-	envName := ""
-	if c.env != nil {
-		envName = c.env.Name
+	localEnvName := ""
+	localEnv := c.variableResolver.GetLocal()
+
+	if localEnv != nil {
+		localEnvName = localEnv.Name
 	}
 
-	return c.collectionExecutor.ExecuteCollection(collection, envName)
+	return c.collectionExecutor.ExecuteCollection(collection, localEnvName)
 }
 
 // ExecuteCollectionSelective executes only the specified requests from a collection.
 func (c *Client) ExecuteCollectionSelective(collectionName string, itemNames []string) (*types.ExecutionResult, error) {
 	collection, err := c.LoadCollection(collectionName)
+
 	if err != nil {
 		return nil, err
 	}
 
-	envName := ""
-	if c.env != nil {
-		envName = c.env.Name
+	localEnvName := ""
+	localEnv := c.variableResolver.GetLocal()
+
+	if localEnv != nil {
+		localEnvName = localEnv.Name
 	}
 
-	return c.collectionExecutor.ExecuteCollectionSelective(collection, envName, itemNames)
+	return c.collectionExecutor.ExecuteCollectionSelective(collection, localEnvName, itemNames)
 }
 
 // ValidateRequest validates a request before execution, checking method, URL, and variables.
