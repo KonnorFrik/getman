@@ -5,8 +5,6 @@ Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor
 package cmd
 
 import (
-	"os"
-
 	"github.com/KonnorFrik/getman"
 	"github.com/spf13/cobra"
 )
@@ -21,36 +19,15 @@ var envInitCmd = &cobra.Command{
 }
 
 func _EnvInitCmd(cmd *cobra.Command, args []string) {
-	if dirFlag == "" {
-		PrintfCobraError(cmd, "Flag 'dir' cannot be empty")
-		return
-	}
-
-	pathStat, err := os.Stat(dirFlag)
+	client, err := createClientWithDirectory(cmd)
 
 	if err != nil {
 		PrintfError("%s\n", err)
 		return
 	}
 
-	if !pathStat.IsDir() {
-		PrintfError("not a directory: %s\n", dirFlag)
-		return
-	}
-
-	client, err := getman.NewClient(dirFlag)
-
-	if err != nil {
-		PrintfError("NewClient: %s\n", err)
-		return
-	}
-
 	for _, name := range args {
-		env := &getman.Environment{
-			Name: name,
-		}
-
-		err := client.SaveEnvironment(env)
+		err := createEnvInStorage(client, name)
 
 		if err != nil {
 			PrintfError("Can't create env %q - %s\n", name, err)
@@ -70,4 +47,14 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func createEnvInStorage(client *getman.Client, envName string) error {
+	env := &getman.Environment{
+		Name: envName,
+	}
+
+	err := client.SaveEnvironment(env)
+
+	return err
 }

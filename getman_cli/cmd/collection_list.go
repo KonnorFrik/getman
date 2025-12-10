@@ -10,9 +10,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/KonnorFrik/getman"
 	"github.com/spf13/cobra"
 )
 
@@ -26,27 +24,10 @@ var listCmd = &cobra.Command{
 }
 
 func _ListCmd(cmd *cobra.Command, args []string) {
-	if dirFlag == "" {
-		PrintfCobraError(cmd, "Flag 'dir' cannot be empty")
-		return
-	}
-
-	pathStat, err := os.Stat(dirFlag)
+	client, err := createClientWithDirectory(cmd)
 
 	if err != nil {
 		PrintfError("%s\n", err)
-		return
-	}
-
-	if !pathStat.IsDir() {
-		PrintfError("Not a directory: %s\n", dirFlag)
-		return
-	}
-
-	client, err := getman.NewClient(dirFlag)
-
-	if err != nil {
-		PrintfError("NewClient: %s\n", err)
 		return
 	}
 
@@ -55,6 +36,12 @@ func _ListCmd(cmd *cobra.Command, args []string) {
 	if err != nil {
 		PrintfError("ListCollections: %s\n", err)
 		return
+	}
+
+	if len(collectionNames) != 0 {
+		fmt.Printf("Collections:\n")
+	} else {
+		fmt.Printf("No collections\n")
 	}
 
 	for ind, name := range collectionNames {

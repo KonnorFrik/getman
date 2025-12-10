@@ -22,31 +22,31 @@ var initCmd = &cobra.Command{
 }
 
 func _InitCmd(cmd *cobra.Command, args []string) {
-	if dirFlag == "" {
+	if flagDirectory == "" {
 		PrintfCobraError(cmd, "Flag 'dir' cannot be empty")
 		return
 	}
 
-	stat, err := os.Stat(dirFlag)
+	stat, err := os.Stat(flagDirectory)
 
 	if os.IsExist(err) {
-		fmt.Printf("[*] The %q is already exist\n", dirFlag)
+		fmt.Printf("[*] The %q is already exist\n", flagDirectory)
 		return
 	}
 
 	if err == nil {
 		if stat.IsDir() {
-			fmt.Printf("[*] The %q is already exist\n", dirFlag)
+			fmt.Printf("[*] The %q is already exist\n", flagDirectory)
 			return
 		}
 
 		if !stat.IsDir() {
-			PrintfError("Not a directory: %q\n", dirFlag)
+			PrintfError("Not a directory: %q\n", flagDirectory)
 			return
 		}
 	}
 
-	_, err = getman.NewClient(dirFlag)
+	_, err = getman.NewClient(flagDirectory)
 
 	if err != nil {
 		PrintfError("NewClient: %s\n", err)
