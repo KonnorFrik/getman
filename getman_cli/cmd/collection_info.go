@@ -12,7 +12,7 @@ import (
 
 // collectionInfoCmd represents the info command
 var collectionInfoCmd = &cobra.Command{
-	Use:   "info ...",
+	Use:   "info <collection> ...<collection>",
 	Short: "Show info about collection",
 	Long: ``,
 	Args: cobra.MinimumNArgs(1),
