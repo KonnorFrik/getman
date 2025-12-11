@@ -23,6 +23,18 @@ type RequestBuilder struct {
 	cookies *types.CookieSettings
 }
 
+const (
+	bodyTypeText = "text"
+	bodyTypeJSON = "json"
+	bodyTypeXML = "xml"
+	bodyTypeRaw = "raw"
+	bodyTypeBinary = "binary"
+
+	authTypeBasic = "basic"
+	authTypeBearer = "bearer"
+	authTypeApiKey = "apikey"
+)
+
 // NewRequestBuilder creates a new RequestBuilder instance.
 func NewRequestBuilder() *RequestBuilder {
 	return &RequestBuilder{
@@ -62,15 +74,26 @@ func (b *RequestBuilder) Headers(headers map[string]string) *RequestBuilder {
 	return b
 }
 
+// BodyString sets the request body as string.
+func (b *RequestBuilder) BodyString(data string) *RequestBuilder {
+	b.body = &types.RequestBody{
+		Type:        bodyTypeText,
+		Content:     []byte(data),
+		ContentType: "text/plain",
+	}
+	return b
+}
+
 // BodyJSON sets the request body as JSON.
-func (b *RequestBuilder) BodyJSON(data interface{}) *RequestBuilder {
+func (b *RequestBuilder) BodyJSON(data any) *RequestBuilder {
 	jsonData, err := json.Marshal(data)
+
 	if err != nil {
 		return b
 	}
 
 	b.body = &types.RequestBody{
-		Type:        "json",
+		Type:        bodyTypeJSON,
 		Content:     jsonData,
 		ContentType: "application/json",
 	}
@@ -85,19 +108,9 @@ func (b *RequestBuilder) BodyXML(data string) *RequestBuilder {
 	}
 
 	b.body = &types.RequestBody{
-		Type:        "xml",
+		Type:        bodyTypeXML,
 		Content:     xmlData,
 		ContentType: "application/xml",
-	}
-	return b
-}
-
-// BodyRaw sets the request body as raw bytes with the specified content type.
-func (b *RequestBuilder) BodyRaw(data []byte, contentType string) *RequestBuilder {
-	b.body = &types.RequestBody{
-		Type:        "raw",
-		Content:     data,
-		ContentType: contentType,
 	}
 	return b
 }
@@ -105,7 +118,7 @@ func (b *RequestBuilder) BodyRaw(data []byte, contentType string) *RequestBuilde
 // BodyBinary sets the request body as binary data with the specified content type.
 func (b *RequestBuilder) BodyBinary(data []byte, contentType string) *RequestBuilder {
 	b.body = &types.RequestBody{
-		Type:        "binary",
+		Type:        bodyTypeBinary,
 		Content:     data,
 		ContentType: contentType,
 	}
@@ -115,7 +128,7 @@ func (b *RequestBuilder) BodyBinary(data []byte, contentType string) *RequestBui
 // AuthBasic sets Basic authentication credentials.
 func (b *RequestBuilder) AuthBasic(username, password string) *RequestBuilder {
 	b.auth = &types.Auth{
-		Type:     "basic",
+		Type:     authTypeBasic,
 		Username: username,
 		Password: password,
 	}
@@ -125,7 +138,7 @@ func (b *RequestBuilder) AuthBasic(username, password string) *RequestBuilder {
 // AuthBearer sets Bearer token authentication.
 func (b *RequestBuilder) AuthBearer(token string) *RequestBuilder {
 	b.auth = &types.Auth{
-		Type:  "bearer",
+		Type:  authTypeBearer,
 		Token: token,
 	}
 	return b
@@ -134,7 +147,7 @@ func (b *RequestBuilder) AuthBearer(token string) *RequestBuilder {
 // AuthAPIKey sets API key authentication with the specified key name, value, and location.
 func (b *RequestBuilder) AuthAPIKey(keyName, keyValue, location string) *RequestBuilder {
 	b.auth = &types.Auth{
-		Type:     "apikey",
+		Type:     authTypeApiKey,
 		APIKey:   keyValue,
 		KeyName:  keyName,
 		Location: location,

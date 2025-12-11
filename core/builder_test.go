@@ -126,32 +126,6 @@ func TestUnitRequestBuilder_BodyXML(t *testing.T) {
 	}
 }
 
-func TestUnitRequestBuilder_BodyRaw(t *testing.T) {
-	builder := NewRequestBuilder()
-	builder.BodyRaw([]byte("raw data"), "text/plain")
-
-	req, err := builder.Method("POST").URL("http://example.com").Build()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if req.Body == nil {
-		t.Fatal("expected body to be set")
-	}
-
-	if req.Body.Type != "raw" {
-		t.Errorf("expected body type 'raw', got %s", req.Body.Type)
-	}
-
-	if req.Body.ContentType != "text/plain" {
-		t.Errorf("expected content type 'text/plain', got %s", req.Body.ContentType)
-	}
-
-	if string(req.Body.Content) != "raw data" {
-		t.Errorf("expected body content 'raw data', got %s", string(req.Body.Content))
-	}
-}
-
 func TestUnitRequestBuilder_BodyBinary(t *testing.T) {
 	builder := NewRequestBuilder()
 	builder.BodyBinary([]byte{1, 2, 3, 4}, "application/octet-stream")
