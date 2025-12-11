@@ -127,11 +127,11 @@ func (hc *HTTPClient) buildHTTPRequest(req *types.Request) (*http.Request, error
 
 func (hc *HTTPClient) applyAuth(httpReq *http.Request, auth *types.Auth) {
 	switch strings.ToLower(auth.Type) {
-	case "basic":
+	case authTypeBasic:
 		httpReq.SetBasicAuth(auth.Username, auth.Password)
-	case "bearer":
+	case authTypeBearer:
 		httpReq.Header.Set("Authorization", "Bearer "+auth.Token)
-	case "apikey":
+	case authTypeApiKey:
 		if strings.ToLower(auth.Location) == "header" {
 			httpReq.Header.Set(auth.KeyName, auth.APIKey)
 		} else if strings.ToLower(auth.Location) == "query" {
