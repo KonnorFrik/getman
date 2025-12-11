@@ -5,9 +5,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/KonnorFrik/getman"
+	"github.com/KonnorFrik/getman/types"
 	"github.com/spf13/cobra"
 )
 
@@ -15,28 +17,27 @@ import (
 var reqNewCmd = &cobra.Command{
 	Use:   "new <collection> ...<collection>",
 	Short: "Create a new request for at least one specified collection",
-	Long: `For add variable - use pattern: "{{url}}/api/path"`,
+	Long: `For use variables from env - use pattern: "{{url}}/api/path"`,
 	Args: cobra.MinimumNArgs(1),
 	Run: _ReqNewCmd,
 }
 
 var (
+	flagRequestName string
 	flagReqBuilderMethod string
 	flagReqBuilderUrl string
 	flagReqBuilderHeader []string = []string{}
 	flagReqBuilderBodyString string
 	flagReqBuilderBodyFile string
 	flagReqBuilderBodyBinary string
-	// TODO: check is this realy need and how it work
-	flagReqBuilderBodyRaw string
 
 	flagReqBuilderAuthBasic string
 	flagReqBuilderAuthBearer string
-	flagReqBuilderAuthApiKey string
+	// flagReqBuilderAuthApiKey string
 
 	// TODO: how to store cookies for requests? Files in storage ? External files ?
-	flagReqBuilderCookieJar bool
-	flagReqBuilderCookieDisable bool
+	// flagReqBuilderCookieJar bool
+	// flagReqBuilderCookieDisable bool
 )
 
 func _ReqNewCmd(cmd *cobra.Command, args []string) {
@@ -70,33 +71,104 @@ func _ReqNewCmd(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		reqBuilder.Header(
+		reqBuilder = reqBuilder.Header(
 			strings.TrimSpace(parts[0]),
 			strings.TrimSpace(parts[1]),
 		)
 	}
 
+	// TODO: add priority or exluding flags if one already setted
 	if flagReqBuilderBodyString != "" {
-		reqBuilder.BodyString()
+		reqBuilder = reqBuilder.BodyString(flagReqBuilderBodyString)
 	}
 
 	if flagReqBuilderBodyFile != "" {
-		// open file and read as text
+		content, err := readFileAsText(flagReqBuilderBodyFile)
+
+		if err != nil {
+			PrintfError("Can't read file: %s: %s\n", flagReqBuilderBodyFile, err)
+			return
+		}
+
+		reqBuilder = reqBuilder.BodyString(content)
 	}
 
 	if flagReqBuilderBodyBinary != "" {
-		// open file and read as bytes
+		content, err := readFileAsBytes(flagReqBuilderBodyBinary)
+
+		if err != nil {
+			PrintfError("Can't read file: %s: %s\n", flagReqBuilderBodyFile, err)
+			return
+		}
+
+		reqBuilder = reqBuilder.BodyBinary(content, "")
 	}
 
-	// build the request 
-	// load collections
-	// append request into each loaded collection
-	// save collection
+	// TODO: add priority or exluding flags if one already setted
+	if flagReqBuilderAuthBasic != "" {
+		parts := strings.Split(flagReqBuilderAuthBasic, ":")
+		
+		if len(parts) != 2 {
+			PrintfError("BasicAuth '%s': invalid syntax\n", flagReqBuilderAuthBasic)
+			return
+		}
 
+		reqBuilder = reqBuilder.AuthBasic(parts[0], parts[1])
+	}
+
+	if flagReqBuilderAuthBearer != "" {
+		reqBuilder = reqBuilder.AuthBearer(flagReqBuilderAuthBearer)
+	}
+
+	// TODO: find a way for: how to set location for api key auth
+	// if flagReqBuilderAuthBearer != "" {
+	// 	reqBuilder.AuthAPIKey(flagReqBuilderAuthBearer)
+	// }
+
+	req, err := reqBuilder.Build()
+
+	if err != nil {
+		PrintfError("Can't build request: %s\n", err)
+		return
+	}
+
+	for _, collName := range args {
+		coll, err := client.LoadCollection(collName)
+
+		if err != nil {
+			PrintfError("Can't load collection: %s: %s\n", collName, err)
+
+			if flagExitOnError {
+				fmt.Printf("Exit on error.")
+				return
+			}
+
+			continue
+		}
+
+		coll.Items = append(coll.Items, &types.RequestItem{
+			Name: flagRequestName,
+			Request: req,
+		})
+
+		err = client.SaveCollection(coll)
+
+		if err != nil {
+			PrintfError("Can't save collection: %s: %s\n", collName, err)
+
+			if flagExitOnError {
+				fmt.Printf("Exit on error.")
+				return
+			}
+		}
+	}
 }
 
 func init() {
 	reqCmd.AddCommand(reqNewCmd)
+
+	reqNewCmd.Flags().StringVarP(&flagRequestName, "name", "n", "default-name", "Name for request")
+
 	reqNewCmd.Flags().StringVarP(&flagReqBuilderMethod, "method", "X", "", "HTTP method for request.")
 	reqNewCmd.Flags().StringVar(&flagReqBuilderUrl, "url", "", "Url for request.")
 
@@ -104,13 +176,32 @@ func init() {
 	reqNewCmd.Flags().StringVar(&flagReqBuilderBodyString, "data", "", "Text body for request.")
 	reqNewCmd.Flags().StringVar(&flagReqBuilderBodyFile, "data-file", "", "Body for request from file as text.")
 	reqNewCmd.Flags().StringVar(&flagReqBuilderBodyBinary, "data-binary", "", "Body for request from file as binary data.")
-	reqNewCmd.Flags().StringVar(&flagReqBuilderBodyRaw, "data-raw", "", "Body for request from file as raw data.")
 
 	reqNewCmd.Flags().StringVarP(&flagReqBuilderAuthBasic, "user", "U", "", "Basic Auth for request. Syntax: \"user:password\"")
 	reqNewCmd.Flags().StringVarP(&flagReqBuilderAuthBearer, "bearer", "B", "", "Bearer Auth for request.")
-	reqNewCmd.Flags().StringVarP(&flagReqBuilderAuthApiKey, "api-key", "K", "", "API Key Auth for request. Syntax: \"X-API-Key:value\"")
+	// reqNewCmd.Flags().StringVarP(&flagReqBuilderAuthApiKey, "api-key", "K", "", "API Key Auth for request. Syntax: \"X-API-Key:value\"")
 
 	// TODO: not implemented.
 	// reqNewCmd.Flags().BoolVarP(&flagReqBuilderCookieJar, "cookie-jar", "c", false, "Enable auto manage for cookies.")
 	// reqNewCmd.Flags().BoolVarP(&flagReqBuilderCookieDisable, "no-cookie", "C", false, "Disable cookies.")
+}
+
+func readFileAsText(filename string) (string, error) {
+	data, err := os.ReadFile(filename)
+
+    if err != nil {
+        return "", err
+    }
+
+    return string(data), nil
+}
+
+func readFileAsBytes(filename string) ([]byte, error) {
+	data, err := os.ReadFile(filename)
+
+    if err != nil {
+        return []byte{}, err
+    }
+
+    return data, nil
 }
