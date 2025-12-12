@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/KonnorFrik/getman"
+	getman "github.com/KonnorFrik/getman/client"
 	"github.com/KonnorFrik/getman/types"
 	"github.com/spf13/cobra"
 )
@@ -17,21 +17,21 @@ import (
 var reqNewCmd = &cobra.Command{
 	Use:   "new <collection> ...<collection>",
 	Short: "Create a new request for at least one specified collection",
-	Long: `For use variables from env - use pattern: "{{url}}/api/path"`,
-	Args: cobra.MinimumNArgs(1),
-	Run: _ReqNewCmd,
+	Long:  `For use variables from env - use pattern: "{{url}}/api/path"`,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _ReqNewCmd,
 }
 
 var (
-	flagRequestName string
-	flagReqBuilderMethod string
-	flagReqBuilderUrl string
-	flagReqBuilderHeader []string = []string{}
+	flagRequestName          string
+	flagReqBuilderMethod     string
+	flagReqBuilderUrl        string
+	flagReqBuilderHeader     []string = []string{}
 	flagReqBuilderBodyString string
-	flagReqBuilderBodyFile string
+	flagReqBuilderBodyFile   string
 	flagReqBuilderBodyBinary string
 
-	flagReqBuilderAuthBasic string
+	flagReqBuilderAuthBasic  string
 	flagReqBuilderAuthBearer string
 	// flagReqBuilderAuthApiKey string
 
@@ -107,7 +107,7 @@ func _ReqNewCmd(cmd *cobra.Command, args []string) {
 	// TODO: add priority or exluding flags if one already setted
 	if flagReqBuilderAuthBasic != "" {
 		parts := strings.Split(flagReqBuilderAuthBasic, ":")
-		
+
 		if len(parts) != 2 {
 			PrintfError("BasicAuth '%s': invalid syntax\n", flagReqBuilderAuthBasic)
 			return
@@ -147,7 +147,7 @@ func _ReqNewCmd(cmd *cobra.Command, args []string) {
 		}
 
 		coll.Items = append(coll.Items, &types.RequestItem{
-			Name: flagRequestName,
+			Name:    flagRequestName,
 			Request: req,
 		})
 
@@ -189,19 +189,19 @@ func init() {
 func readFileAsText(filename string) (string, error) {
 	data, err := os.ReadFile(filename)
 
-    if err != nil {
-        return "", err
-    }
+	if err != nil {
+		return "", err
+	}
 
-    return string(data), nil
+	return string(data), nil
 }
 
 func readFileAsBytes(filename string) ([]byte, error) {
 	data, err := os.ReadFile(filename)
 
-    if err != nil {
-        return []byte{}, err
-    }
+	if err != nil {
+		return []byte{}, err
+	}
 
-    return data, nil
+	return data, nil
 }

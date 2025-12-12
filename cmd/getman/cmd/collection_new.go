@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/KonnorFrik/getman"
+	getman "github.com/KonnorFrik/getman/client"
 	"github.com/spf13/cobra"
 )
 
@@ -12,9 +12,9 @@ import (
 var newCmd = &cobra.Command{
 	Use:   "new <name>",
 	Short: "Create new collections.",
-	Long: `Create a new collection in storage.`,
-	Args: cobra.ExactArgs(1),
-	Run: _CollectionNewCmd,
+	Long:  `Create a new collection in storage.`,
+	Args:  cobra.ExactArgs(1),
+	Run:   _CollectionNewCmd,
 }
 
 func _CollectionNewCmd(cmd *cobra.Command, args []string) {
@@ -48,8 +48,8 @@ func _CollectionNewCmd(cmd *cobra.Command, args []string) {
 	}
 
 	collection := getman.Collection{
-		Name: args[0],
-		EnvName: flagCollectionEnvName,
+		Name:        args[0],
+		EnvName:     flagCollectionEnvName,
 		Description: flagCollectionDescription,
 	}
 
@@ -63,7 +63,7 @@ func _CollectionNewCmd(cmd *cobra.Command, args []string) {
 // flags
 var (
 	flagCollectionDescription string
-	flagCollectionEnvName string
+	flagCollectionEnvName     string
 	// what if env don't exist
 	// check is exist?
 	// do nothing

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -8,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/KonnorFrik/getman"
+	getman "github.com/KonnorFrik/getman/client"
 	"github.com/spf13/cobra"
 )
 
@@ -16,9 +15,9 @@ import (
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init a base directory with name 'dir'",
-	Long: ``,
-	Args: cobra.NoArgs,
-	Run: _InitCmd,
+	Long:  ``,
+	Args:  cobra.NoArgs,
+	Run:   _InitCmd,
 }
 
 func _InitCmd(cmd *cobra.Command, args []string) {

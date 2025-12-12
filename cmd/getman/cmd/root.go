@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/KonnorFrik/getman"
+	getman "github.com/KonnorFrik/getman/client"
 	"github.com/spf13/cobra"
 )
 
@@ -74,11 +74,11 @@ func createClientWithDirectory(cmd *cobra.Command) (*getman.Client, error) {
 		return nil, fmt.Errorf("not a directory: %s\n", flagDirectory)
 	}
 
-	client, err := getman.NewClient(flagDirectory)
+	cl, err := getman.NewClient(flagDirectory)
 
 	if err != nil {
 		return nil, fmt.Errorf("NewClient: %s\n", err)
 	}
 
-	return client, nil
+	return cl, nil
 }

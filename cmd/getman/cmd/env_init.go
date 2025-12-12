@@ -1,11 +1,10 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
 import (
-	"github.com/KonnorFrik/getman"
+	getman "github.com/KonnorFrik/getman/client"
 	"github.com/spf13/cobra"
 )
 
@@ -13,9 +12,9 @@ import (
 var envInitCmd = &cobra.Command{
 	Use:   "init <name> ...<name>",
 	Short: "Create a new environment",
-	Long: ``,
-	Args: cobra.MinimumNArgs(1),
-	Run: _EnvInitCmd,
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _EnvInitCmd,
 }
 
 func _EnvInitCmd(cmd *cobra.Command, args []string) {
@@ -49,12 +48,12 @@ func init() {
 	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func createEnvInStorage(client *getman.Client, envName string) error {
+func createEnvInStorage(cl *getman.Client, envName string) error {
 	env := &getman.Environment{
 		Name: envName,
 	}
 
-	err := client.SaveEnvironment(env)
+	err := cl.SaveEnvironment(env)
 
 	return err
 }

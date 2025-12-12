@@ -4,7 +4,7 @@ Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor
 package cmd
 
 import (
-	"github.com/KonnorFrik/getman"
+	getman "github.com/KonnorFrik/getman/client"
 	"github.com/spf13/cobra"
 )
 
@@ -12,9 +12,9 @@ import (
 var runCmd = &cobra.Command{
 	Use:   "run <collection_name> ...<collection_name>",
 	Short: "Run a given collection of requests",
-	Long: `Run a given collection of requests from current dir`,
-	Args: cobra.MinimumNArgs(1),
-	Run: _RunCmd,
+	Long:  `Run a given collection of requests from current dir`,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _RunCmd,
 }
 
 // var flagCollectionRunWithEnvName string
