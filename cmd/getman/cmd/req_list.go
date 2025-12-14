@@ -11,7 +11,7 @@ import (
 
 // listCmd represents the list command
 var reqListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list <collection> ...<collection>",
 	Short: "List all requests from collection",
 	Long: ``,
 	Args: cobra.MinimumNArgs(1),
