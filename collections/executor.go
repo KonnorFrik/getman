@@ -30,6 +30,54 @@ func (ce *CollectionExecutor) ExecuteCollection(collection *Collection, environm
 	return ce.ExecuteCollectionSelective(collection, environment, nil)
 }
 
+// ExecuteCollectionAsync executes all requests in a collection asynchronously.
+// It returns a channel that receives RequestExecution results as they complete.
+// The channel is buffered with capacity 1. Results are sent in the order requests are processed.
+// Note: The channel is not closed automatically after all requests complete.
+func (ce *CollectionExecutor) ExecuteCollectionAsync(collection *Collection, environment string) <-chan *types.RequestExecution {
+	ch := make(chan *types.RequestExecution, 1)
+
+	go func() {
+		itemsToExecute := collection.Items
+
+		for _, item := range itemsToExecute {
+			req := item.Request
+			resolvedReq, err := ce.resolveRequest(req)
+
+			if err != nil {
+				execution := &types.RequestExecution{
+					Request:   req,
+					Error:     fmt.Sprintf("failed to resolve variables: %v", err),
+					Duration:  0,
+					Timestamp: time.Now(),
+				}
+				ch <- execution
+				continue
+			}
+
+			execStartTime := time.Now()
+			response, err := ce.httpClient.Execute(resolvedReq)
+			execDuration := time.Since(execStartTime)
+			execution := &types.RequestExecution{
+				Request:   resolvedReq,
+				Duration:  execDuration,
+				Timestamp: time.Now(),
+			}
+
+			if err != nil {
+				execution.Error = err.Error()
+
+			} else {
+				execution.Response = response
+			}
+
+			ch <- execution
+		}
+	}()
+
+	return ch
+}
+
 // ExecuteCollectionSelective executes only the specified requests from a collection.
 func (ce *CollectionExecutor) ExecuteCollectionSelective(collection *Collection, environment string, itemNames []string) (*types.ExecutionResult, error) {
 	startTime := time.Now()
@@ -51,11 +99,13 @@ func (ce *CollectionExecutor) ExecuteCollectionSelective(collection *Collection,
 		}
 	}
 
-	var executions []*types.RequestExecution
-	var totalDuration time.Duration
-	var successCount, failedCount int
-	var minTime, maxTime time.Duration
-	var firstTime = true
+	var (
+		executions                []*types.RequestExecution
+		totalDuration             time.Duration
+		successCount, failedCount int
+		minTime, maxTime          time.Duration
+		firstTime                 = true
+	)
 
 	for _, item := range itemsToExecute {
 		req := item.Request
