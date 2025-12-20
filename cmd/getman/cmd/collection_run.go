@@ -33,9 +33,12 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 			continue
 		}
 
+		var index int
+
 		for data := range result {
-			getman.PrintExecutionResult(data)
+			getman.PrintRequestExecution(data, index)
 			println()
+			index++
 		}
 
 	}
