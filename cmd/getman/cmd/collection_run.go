@@ -26,15 +26,18 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 	}
 
 	for ind, collectionName := range args {
-		result, err := client.ExecuteCollection(collectionName)
+		result := client.ExecuteCollectionAsync(collectionName)
 
-		if err != nil {
-			PrintfError("[!] #%d - %s\n", ind, err)
+		if result == nil {
+			PrintfError("[!] #%d - can't run collection\n", ind)
 			continue
 		}
 
-		getman.PrintExecutionResult(result)
-		println()
+		for data := range result {
+			getman.PrintExecutionResult(data)
+			println()
+		}
+
 	}
 }
 
