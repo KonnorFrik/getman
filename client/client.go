@@ -650,6 +650,10 @@ func PrintExecutionResult(result *types.ExecutionResult) {
 	formatter.PrintExecutionResult(result)
 }
 
+func PrintRequestExecution(req *types.RequestExecution, index int) {
+	formatter.PrintRequestExecution(req, index)
+}
+
 func PrintStatistics(stats *types.Statistics) {
 	formatter.PrintStatistics(stats)
 }
