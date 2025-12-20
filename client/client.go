@@ -424,6 +424,23 @@ func (c *Client) ExecuteCollection(collectionName string) (*types.ExecutionResul
 	return c.collectionExecutor.ExecuteCollection(collection, localEnvName)
 }
 
+func (c *Client) ExecuteCollectionAsync(collectionName string) <-chan *types.RequestExecution {
+	collection, err := c.LoadCollection(collectionName)
+
+	if err != nil {
+		return nil
+	}
+
+	localEnvName := ""
+	localEnv := c.variableResolver.GetLocal()
+
+	if localEnv != nil {
+		localEnvName = localEnv.Name
+	}
+
+	return c.collectionExecutor.ExecuteCollectionAsync(collection, localEnvName)
+}
+
 // ExecuteCollectionSelective executes only the specified requests from a collection.
 func (c *Client) ExecuteCollectionSelective(collectionName string, itemNames []string) (*types.ExecutionResult, error) {
 	collection, err := c.LoadCollection(collectionName)
