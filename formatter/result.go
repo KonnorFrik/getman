@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package formatter
 
@@ -16,7 +15,7 @@ import (
 
 var (
 	colorFgMagneta = color.New(color.FgHiMagenta)
-	colorFgCyan = color.New(color.FgHiCyan)
+	colorFgCyan    = color.New(color.FgHiCyan)
 )
 
 // FormatRequest formats a request as a string for display.
@@ -147,45 +146,50 @@ func FormatExecutionResult(result *types.ExecutionResult) string {
 	return sb.String()
 }
 
+// PrintRequestExecution prints a formatted request execution to stdout with color coding.
+func PrintRequestExecution(req *types.RequestExecution, index int) {
+	fmt.Printf("\n%d. %s %s\n", index+1, req.Request.Method, req.Request.URL)
+
+	if req.Error != "" {
+		color.Red("   Error: %s\n", req.Error)
+
+	} else if req.Response != nil {
+		var statusColor *color.Color
+
+		switch {
+		case req.Response.StatusCode >= 200 && req.Response.StatusCode < 300:
+			statusColor = color.New(color.FgGreen)
+
+		case req.Response.StatusCode >= 300 && req.Response.StatusCode < 400:
+			statusColor = color.New(color.FgYellow)
+
+		case req.Response.StatusCode >= 400 && req.Response.StatusCode < 500:
+			statusColor = color.New(color.FgRed)
+
+		default:
+			statusColor = color.New(color.FgMagenta)
+		}
+
+		statusColor.Printf("   Status: %d\n", req.Response.StatusCode)
+		fmt.Printf("   Duration: %v\n", req.Duration)
+		colorFgMagneta.Printf("   Headers:\n")
+
+		for k, v := range req.Response.Headers {
+			colorFgCyan.Printf("\t%s", k)
+			fmt.Printf(": %s\n", strings.Join(v, " "))
+		}
+
+		colorFgMagneta.Printf("   Body:\n")
+		fmt.Printf("%s\n", string(req.Response.Body))
+	}
+}
+
 // PrintExecutionResult prints a formatted execution result to stdout with color coding.
 func PrintExecutionResult(result *types.ExecutionResult) {
 	fmt.Println("\nRequests:")
 
 	for i, req := range result.Requests {
-		fmt.Printf("\n%d. %s %s\n", i+1, req.Request.Method, req.Request.URL)
-
-		if req.Error != "" {
-			color.Red("   Error: %s\n", req.Error)
-
-		} else if req.Response != nil {
-			var statusColor *color.Color
-
-			switch {
-			case req.Response.StatusCode >= 200 && req.Response.StatusCode < 300:
-				statusColor = color.New(color.FgGreen)
-
-			case req.Response.StatusCode >= 300 && req.Response.StatusCode < 400:
-				statusColor = color.New(color.FgYellow)
-
-			case req.Response.StatusCode >= 400 && req.Response.StatusCode < 500:
-				statusColor = color.New(color.FgRed)
-
-			default:
-				statusColor = color.New(color.FgMagenta)
-			}
-
-			statusColor.Printf("   Status: %d\n", req.Response.StatusCode)
-			fmt.Printf("   Duration: %v\n", req.Duration)
-			colorFgMagneta.Printf("   Headers:\n")
-
-			for k, v := range req.Response.Headers {
-				colorFgCyan.Printf("\t%s", k)
-				fmt.Printf(": %s\n", strings.Join(v, " "))
-			}
-
-			colorFgMagneta.Printf("   Body:\n")
-			fmt.Printf("%s\n", string(req.Response.Body))
-		}
+		PrintRequestExecution(req, i)
 	}
 
 	fmt.Printf("\n")
