@@ -17,8 +17,6 @@ var runCmd = &cobra.Command{
 	Run:   _RunCmd,
 }
 
-// var flagCollectionRunWithEnvName string
-
 func _RunCmd(cmd *cobra.Command, args []string) {
 	client, err := createClientWithDirectory(cmd)
 
@@ -27,18 +25,7 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	// var envNames []string
-	// if flagCollectionRunWithEnvName != "" {
-	// 	for name := range strings.SplitSeq(flagCollectionRunWithEnvName, ",") {
-	// 		name = strings.TrimSpace(name)
-	// 		envNames = append(envNames, name)
-	// 	}
-	// }
-
 	for ind, collectionName := range args {
-		// if ind < len(envNames) {
-		// }
-
 		result, err := client.ExecuteCollection(collectionName)
 
 		if err != nil {
