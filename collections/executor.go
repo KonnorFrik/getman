@@ -38,6 +38,7 @@ func (ce *CollectionExecutor) ExecuteCollectionAsync(collection *Collection, env
 	ch := make(chan *types.RequestExecution, 1)
 
 	go func() {
+		defer close(ch)
 		itemsToExecute := collection.Items
 
 		for _, item := range itemsToExecute {
