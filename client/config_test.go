@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/testutil/fixture"
+	"github.com/KonnorFrik/getman/testutil/helper"
 )
 
 func TestUnitLoadConfig_Valid(t *testing.T) {
@@ -263,4 +263,3 @@ func TestUnitValidateConfig_MissingLoggingLevel(t *testing.T) {
 		t.Fatal("expected error for missing logging level")
 	}
 }
-

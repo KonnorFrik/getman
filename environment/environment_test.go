@@ -251,4 +251,3 @@ func TestUnitSaveEnvironmentToFile_EmptyVariables(t *testing.T) {
 		t.Errorf("expected 0 variables, got %d", len(loadedEnv.Variables))
 	}
 }
-

@@ -240,4 +240,3 @@ func TestIntegrationStorage_ConcurrentAccess(t *testing.T) {
 		t.Errorf("expected %d items, got %d", numGoroutines*numOperations, len(list))
 	}
 }
-

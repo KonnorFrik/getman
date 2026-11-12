@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/testutil/fixture"
+	"github.com/KonnorFrik/getman/testutil/helper"
 )
 
 func TestUnitImportFromPostman_Valid(t *testing.T) {
@@ -627,4 +627,3 @@ func TestUnitImportFromPostman_APIKeyAuth_QueryLocation(t *testing.T) {
 		t.Errorf("expected location 'query', got %s", req.Auth.Location)
 	}
 }
-

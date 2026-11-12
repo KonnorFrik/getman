@@ -235,4 +235,3 @@ func TestUnitMaskToken(t *testing.T) {
 		})
 	}
 }
-
