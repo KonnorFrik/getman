@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/testutil/fixture"
+	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/types"
 )
 
@@ -477,26 +477,26 @@ func TestUnitGetHistory(t *testing.T) {
 		StartTime:      time.Now(),
 		EndTime:        time.Now(),
 		TotalDuration:  time.Second,
-		Requests:       []*types.RequestExecution{
+		Requests: []*types.RequestExecution{
 			{
 				Request: &types.Request{
-					Method: "GET",
-					URL: "url.com",
+					Method:  "GET",
+					URL:     "url.com",
 					Headers: map[string]string{"Content-Type": "application/json"},
 					Auth: &types.Auth{
-						Type: "Bearer",
+						Type:  "Bearer",
 						Token: "aboba",
 					},
 					Timeout: &types.Timeout{
 						Connect: time.Second * 30,
-						Read: time.Second * 30,
+						Read:    time.Second * 30,
 					},
 					Cookies: &types.CookieSettings{
 						AutoManage: true,
 					},
 				},
-				Response: fixture.CreateTestResponse(200, []byte("TestBody")),
-				Duration: time.Microsecond * 150,
+				Response:  fixture.CreateTestResponse(200, []byte("TestBody")),
+				Duration:  time.Microsecond * 150,
 				Timestamp: time.Now(),
 			},
 		},
@@ -566,4 +566,3 @@ func TestUnitUpdateConfig(t *testing.T) {
 		t.Errorf("expected connect timeout 60s, got %v", updatedConfig.Defaults.Timeout.Connect)
 	}
 }
-

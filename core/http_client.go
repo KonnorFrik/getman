@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/KonnorFrik/getman/errors"
@@ -49,15 +50,26 @@ func NewHTTPClient(connectTimeout, readTimeout time.Duration, autoManageCookies 
 }
 
 type cookieJarImpl struct {
+	mu      sync.RWMutex
 	cookies map[string][]*http.Cookie
 }
 
 func (j *cookieJarImpl) SetCookies(u *url.URL, cookies []*http.Cookie) {
-	j.cookies[u.Host] = cookies
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	if len(cookies) == 0 {
+		delete(j.cookies, u.Host)
+		return
+	}
+
+	j.cookies[u.Host] = append([]*http.Cookie(nil), cookies...)
 }
 
 func (j *cookieJarImpl) Cookies(u *url.URL) []*http.Cookie {
-	return j.cookies[u.Host]
+	j.mu.RLock()
+	defer j.mu.RUnlock()
+	return append([]*http.Cookie(nil), j.cookies[u.Host]...)
 }
 
 // Execute performs an HTTP request and returns the response.
@@ -69,7 +81,7 @@ func (hc *HTTPClient) Execute(req *types.Request) (*types.Response, error) {
 		return nil, fmt.Errorf("failed to build HTTP request: %w", err)
 	}
 
-	httpResp, err := hc.client.Do(httpReq)
+	httpResp, err := hc.clientForRequest(req).Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", errors.ErrRequestFailed, err)
 	}
@@ -97,6 +109,36 @@ func (hc *HTTPClient) Execute(req *types.Request) (*types.Response, error) {
 	}
 
 	return response, nil
+}
+
+func (hc *HTTPClient) clientForRequest(req *types.Request) *http.Client {
+	client := *hc.client
+
+	if req.Timeout != nil {
+		if req.Timeout.Read > 0 {
+			client.Timeout = req.Timeout.Read
+		}
+
+		if req.Timeout.Connect > 0 {
+			if transport, ok := hc.client.Transport.(*http.Transport); ok {
+				cloned := transport.Clone()
+				cloned.ResponseHeaderTimeout = req.Timeout.Connect
+				client.Transport = cloned
+			}
+		}
+	}
+
+	if req.Cookies != nil {
+		if req.Cookies.AutoManage {
+			if client.Jar == nil {
+				client.Jar = &cookieJarImpl{cookies: make(map[string][]*http.Cookie)}
+			}
+		} else {
+			client.Jar = nil
+		}
+	}
+
+	return &client
 }
 
 func (hc *HTTPClient) buildHTTPRequest(req *types.Request) (*http.Request, error) {

@@ -33,41 +33,60 @@ func NewVariableResolver(global, local *environment.Environment) (*VariableResol
 var variablePattern = regexp.MustCompile(`\{\{([^}]+)\}\}`)
 
 // Resolve resolves variables in a template string using the current environment.
+// Variables are resolved recursively, so values may reference other variables.
 func (vr *VariableResolver) Resolve(template string) (string, error) {
-	matches := variablePattern.FindAllStringSubmatch(template, -1)
-
-	if matches == nil {
-		return template, nil
-	}
+	const maxDepth = 100
 
 	result := template
+	seen := make(map[string]struct{})
 
-	for _, match := range matches {
-		if len(match) < 2 {
-			continue
+	for depth := 0; ; depth++ {
+		if depth >= maxDepth {
+			return "", fmt.Errorf("%w: circular variable reference", errors.ErrInvalidArgument)
 		}
 
-		varName := strings.TrimSpace(match[1])
-		var (
-			value string
-			ok    bool
-		)
-
-		if vr.local != nil {
-			value, ok = vr.local.Get(varName)
-
-		} else {
-			value, ok = vr.global.Get(varName)
+		matches := variablePattern.FindAllStringSubmatch(result, -1)
+		if len(matches) == 0 {
+			return result, nil
 		}
 
-		if !ok {
-			return "", fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
+		for _, match := range matches {
+			if len(match) < 2 {
+				continue
+			}
+
+			varName := strings.TrimSpace(match[1])
+			value, ok := vr.lookup(varName)
+			if !ok {
+				return "", fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
+			}
+
+			result = strings.ReplaceAll(result, match[0], value)
 		}
 
-		result = strings.ReplaceAll(result, match[0], value)
+		if _, ok := seen[result]; ok {
+			return "", fmt.Errorf("%w: circular variable reference", errors.ErrInvalidArgument)
+		}
+
+		seen[result] = struct{}{}
+	}
+}
+
+// lookup returns a variable value using local environment priority over global.
+func (vr *VariableResolver) lookup(varName string) (string, bool) {
+	if vr.local != nil {
+		if value, ok := vr.local.Get(varName); ok {
+			return value, true
+		}
 	}
 
-	return result, nil
+	if vr.global != nil {
+		if value, ok := vr.global.Get(varName); ok {
+			return value, true
+		}
+	}
+
+	return "", false
 }
 
 // ResolveMap resolves variables in both keys and values of a map.
@@ -128,16 +147,7 @@ func (vr *VariableResolver) ValidateVariables(template string) error {
 
 		varName := strings.TrimSpace(match[1])
 
-		var ok bool
-
-		if vr.local != nil {
-			_, ok = vr.local.Get(varName)
-
-		} else {
-			_, ok = vr.global.Get(varName)
-		}
-
-		if !ok {
+		if _, ok := vr.lookup(varName); !ok {
 			return fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
 		}
 	}

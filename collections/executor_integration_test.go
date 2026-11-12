@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/KonnorFrik/getman/core"
+	"github.com/KonnorFrik/getman/environment"
 	"github.com/KonnorFrik/getman/testutil/http_server"
 	"github.com/KonnorFrik/getman/types"
-	"github.com/KonnorFrik/getman/environment"
 )
 
 func TestIntegrationExecuteCollection_SingleRequest(t *testing.T) {
@@ -301,4 +301,3 @@ func TestIntegrationExecuteCollectionSelective(t *testing.T) {
 		t.Errorf("expected total 1, got %d", result.Statistics.Total)
 	}
 }
-

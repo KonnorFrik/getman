@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package storage
 
@@ -10,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"time"
 
 	"github.com/KonnorFrik/getman/types"
 )
@@ -29,16 +27,12 @@ func NewLogStorage(fileStorage *FileStorage) *LogStorage {
 
 // Save saves log entries to a timestamped JSON file.
 func (ls *LogStorage) Save(logs []types.LogEntry) error {
-	timestamp := FormatTimestamp(time.Now())
-	filename := fmt.Sprintf("%s.json", timestamp)
-	filePath := filepath.Join(ls.fileStorage.LogsDir(), filename)
-
 	data, err := json.MarshalIndent(logs, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal logs: %w", err)
 	}
 
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	if err := writeTimestampedFile(ls.fileStorage.LogsDir(), data); err != nil {
 		return fmt.Errorf("failed to write log file: %w", err)
 	}
 

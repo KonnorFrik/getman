@@ -462,7 +462,7 @@ func TestUnitExecute_Timeout(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewHTTPClient(10 * time.Millisecond, 10 * time.Millisecond, false)
+	client := NewHTTPClient(10*time.Millisecond, 10*time.Millisecond, false)
 	req := &types.Request{
 		Method: http.MethodGet,
 		URL:    server.URL,

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil/http_server"
-	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/testutil/fixture"
+	"github.com/KonnorFrik/getman/testutil/helper"
+	"github.com/KonnorFrik/getman/testutil/http_server"
 	"github.com/KonnorFrik/getman/types"
 )
 
@@ -387,4 +387,3 @@ func TestIntegrationCollectionManagement(t *testing.T) {
 		t.Errorf("expected 1 collection, got %d", len(collections))
 	}
 }
-

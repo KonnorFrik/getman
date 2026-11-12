@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package storage
 
@@ -9,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -106,6 +106,40 @@ func (fs *FileStorage) LogsDir() string {
 func (fs *FileStorage) ConfigPath() string {
 	const fileName = "config.yaml"
 	return filepath.Join(fs.basePath, fileName)
+}
+
+var timestampedWriteMu sync.Mutex
+
+// writeTimestampedFile writes data to a new file in dir using the current time as
+// the filename. If a file with the same timestamp already exists, the next
+// millisecond is used.
+func writeTimestampedFile(dir string, data []byte) error {
+	timestampedWriteMu.Lock()
+	defer timestampedWriteMu.Unlock()
+
+	now := time.Now()
+
+	for range 1000 {
+		filePath := filepath.Join(dir, FormatTimestamp(now)+".json")
+
+		file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+		if err == nil {
+			if _, err := file.Write(data); err != nil {
+				file.Close()
+				return err
+			}
+
+			return file.Close()
+		}
+
+		if !os.IsExist(err) {
+			return err
+		}
+
+		now = now.Add(time.Millisecond)
+	}
+
+	return fmt.Errorf("failed to create unique timestamped file in %s", dir)
 }
 
 const timeFormat string = "02_01_06_15_04_05.0000"

@@ -1,8 +1,8 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package environment
+
 //
 // import (
 // 	"sync"

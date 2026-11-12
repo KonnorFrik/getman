@@ -21,7 +21,7 @@ type Environment struct {
 // NewEnvironment creates a new Environment instance with the specified name.
 func NewEnvironment(name string) *Environment {
 	return &Environment{
-		Name: name,
+		Name:      name,
 		Variables: make(map[string]string),
 	}
 }

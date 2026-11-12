@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/testutil/fixture"
+	"github.com/KonnorFrik/getman/testutil/helper"
 	"github.com/KonnorFrik/getman/testutil/http_server"
 )
 
@@ -185,4 +185,3 @@ func TestIntegrationImportFromPostman_ComplexCollection(t *testing.T) {
 		t.Errorf("expected item 2 name 'Request 3', got %s", collection.Items[2].Name)
 	}
 }
-
