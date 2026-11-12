@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	go build -o getman main.go
+	go build -o getman ./cmd/getman
 
 # .PHONY: install
 # install: build
