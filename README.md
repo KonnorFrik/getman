@@ -31,12 +31,15 @@ func main() {
         log.Fatal(err)
     }
 
-    req := getman.NewRequestBuilder().
+    req, err := getman.NewRequestBuilder().
         Method("GET").
         URL("{{baseUrl}}/users").
         Header("Accept", "application/json").
         AuthBearer("{{token}}").
         Build()
+    if err != nil {
+        log.Fatal(err)
+    }
 
     result, err := client.ExecuteRequest(req)
     if err != nil {

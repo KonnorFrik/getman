@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/KonnorFrik/getman/collections"
@@ -39,57 +40,22 @@ const globalEnvName = "global"
 // It initializes all required components including file storage, history storage,
 // log storage, HTTP client, and variable resolver.
 func NewClient(basePath string) (*Client, error) {
-	var (
-		client    Client
-		globalEnv = environment.NewEnvironment(globalEnvName)
-	)
-
 	fileStorage, err := storage.NewFileStorage(basePath)
-
 	if err != nil {
 		return nil, err
 	}
 
-	client.storage = fileStorage
 	config := DefaultConfig()
 	configPath := fileStorage.ConfigPath()
 
 	if _, err := os.Stat(configPath); err == nil {
 		loadedConfig, err := LoadConfig(configPath)
-
 		if err == nil {
 			config = loadedConfig
 		}
 	}
 
-	historyStorage := storage.NewHistoryStorage(fileStorage)
-	logStorage := storage.NewLogStorage(fileStorage)
-	variableResolver, err := core.NewVariableResolver(globalEnv, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	client.LoadGlobalEnvironment()
-
-	// if err != nil {
-	// 	variableResolver.SetGlobal(globalEnv)
-	// }
-
-	connectTimeout := config.Defaults.Timeout.Connect
-	readTimeout := config.Defaults.Timeout.Read
-	autoManageCookies := config.Defaults.Cookies.AutoManage
-	httpClient := core.NewHTTPClient(connectTimeout, readTimeout, autoManageCookies)
-	collectionExecutor := collections.NewCollectionExecutor(httpClient, variableResolver)
-
-	client.historyStorage = historyStorage
-	client.logStorage = logStorage
-	client.variableResolver = variableResolver
-	client.httpClient = httpClient
-	client.collectionExecutor = collectionExecutor
-	client.config = config
-
-	return &client, nil
+	return newClient(fileStorage, config)
 }
 
 // NewClientWithConfig creates a new Client instance using configuration from the specified file.
@@ -99,7 +65,40 @@ func NewClientWithConfig(configPath string) (*Client, error) {
 		return nil, err
 	}
 
-	return NewClient(config.Storage.BasePath)
+	fileStorage, err := storage.NewFileStorage(config.Storage.BasePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return newClient(fileStorage, config)
+}
+
+func newClient(fileStorage *storage.FileStorage, config *Config) (*Client, error) {
+	globalEnv := environment.NewEnvironment(globalEnvName)
+	variableResolver, err := core.NewVariableResolver(globalEnv, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient := core.NewHTTPClient(
+		config.Defaults.Timeout.Connect,
+		config.Defaults.Timeout.Read,
+		config.Defaults.Cookies.AutoManage,
+	)
+
+	client := &Client{
+		storage:            fileStorage,
+		historyStorage:     storage.NewHistoryStorage(fileStorage),
+		logStorage:         storage.NewLogStorage(fileStorage),
+		httpClient:         httpClient,
+		collectionExecutor: collections.NewCollectionExecutor(httpClient, variableResolver),
+		variableResolver:   variableResolver,
+		config:             config,
+	}
+
+	_ = client.LoadGlobalEnvironment()
+
+	return client, nil
 }
 
 // NewClientWithDefaults creates a Client instance with default paths (~/.getman).
@@ -113,6 +112,12 @@ func NewClientWithDefaults() (*Client, error) {
 	return NewClient(basePath)
 }
 
+// LoadEnvironment loads a local environment by name and makes it active.
+// It is an alias for LoadLocalEnvironment.
+func (c *Client) LoadEnvironment(name string) error {
+	return c.LoadLocalEnvironment(name)
+}
+
 // LoadLocalEnvironment loads a local environment by name from storage.
 func (c *Client) LoadLocalEnvironment(name string) error {
 	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", name))
@@ -122,7 +127,6 @@ func (c *Client) LoadLocalEnvironment(name string) error {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, name)
 	}
 
-	// c.env = env
 	c.variableResolver.SetLocal(env)
 	return nil
 }
@@ -136,7 +140,6 @@ func (c *Client) LoadGlobalEnvironment() error {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, globalEnvName)
 	}
 
-	// c.globalEnv = env
 	c.variableResolver.SetGlobal(env)
 	return nil
 }
@@ -211,6 +214,7 @@ func (c *Client) ListEnvironments() ([]string, error) {
 		}
 	}
 
+	sort.Strings(names)
 	return names, nil
 }
 
@@ -220,6 +224,10 @@ func (c *Client) DeleteEnvironment(name string) error {
 
 	if err := os.Remove(filePath); err != nil {
 		return fmt.Errorf("%w: %s", ErrEnvironmentNotFound, name)
+	}
+
+	if local := c.variableResolver.GetLocal(); local != nil && local.Name == name {
+		c.variableResolver.SetLocal(nil)
 	}
 
 	return nil
@@ -255,12 +263,13 @@ func (c *Client) GetGlobalVariable(key string) (string, bool) {
 	return result, ok
 }
 
-// SetVariable sets a variable in the current local environment.
+// SetVariable sets a variable in the current local environment and persists it.
 func (c *Client) SetVariable(key, value string) {
 	env := c.variableResolver.GetLocal()
 
 	if env != nil {
 		env.Set(key, value)
+		_ = c.saveEnvironmentFile(env)
 	}
 }
 
@@ -298,13 +307,9 @@ func (c *Client) LoadCollection(name string) (*collections.Collection, error) {
 	filePath := collections.GetCollectionPath(c.storage, name)
 	collection, err := collections.LoadCollectionFromFile(filePath)
 
-	fmt.Printf("LoadCollection: load: %s\n", name)
-
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrCollectionNotFound, name)
 	}
-
-	fmt.Printf("LoadCollection: loaded: %+v\n", collection)
 
 	if collection.EnvName != "" {
 		err = c.LoadLocalEnvironment(collection.EnvName)
@@ -319,6 +324,10 @@ func (c *Client) LoadCollection(name string) (*collections.Collection, error) {
 
 // SaveCollection saves a collection to storage.
 func (c *Client) SaveCollection(collection *collections.Collection) error {
+	if collection == nil {
+		return fmt.Errorf("%w: 'collection' is nil", ErrInvalidArgument)
+	}
+
 	filePath := collections.GetCollectionPath(c.storage, collection.Name)
 	return collections.SaveCollectionToFile(collection, filePath)
 }
@@ -342,6 +351,7 @@ func (c *Client) ListCollections() ([]string, error) {
 		}
 	}
 
+	sort.Strings(names)
 	return names, nil
 }
 

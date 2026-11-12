@@ -5,7 +5,6 @@ package core
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"time"
 
@@ -24,13 +23,13 @@ type RequestBuilder struct {
 }
 
 const (
-	bodyTypeText = "text"
-	bodyTypeJSON = "json"
-	bodyTypeXML = "xml"
-	bodyTypeRaw = "raw"
+	bodyTypeText   = "text"
+	bodyTypeJSON   = "json"
+	bodyTypeXML    = "xml"
+	bodyTypeRaw    = "raw"
 	bodyTypeBinary = "binary"
 
-	authTypeBasic = "basic"
+	authTypeBasic  = "basic"
 	authTypeBearer = "bearer"
 	authTypeApiKey = "apikey"
 )
@@ -100,17 +99,22 @@ func (b *RequestBuilder) BodyJSON(data any) *RequestBuilder {
 	return b
 }
 
-// BodyXML sets the request body as XML.
+// BodyXML sets the request body as raw XML.
 func (b *RequestBuilder) BodyXML(data string) *RequestBuilder {
-	xmlData, err := xml.Marshal(data)
-	if err != nil {
-		return b
-	}
-
 	b.body = &types.RequestBody{
 		Type:        bodyTypeXML,
-		Content:     xmlData,
+		Content:     []byte(data),
 		ContentType: "application/xml",
+	}
+	return b
+}
+
+// BodyRaw sets the request body as raw data with the specified content type.
+func (b *RequestBuilder) BodyRaw(data []byte, contentType string) *RequestBuilder {
+	b.body = &types.RequestBody{
+		Type:        bodyTypeRaw,
+		Content:     data,
+		ContentType: contentType,
 	}
 	return b
 }
