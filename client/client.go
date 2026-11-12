@@ -29,8 +29,8 @@ type Client struct {
 	logStorage         *storage.LogStorage
 	httpClient         *core.HTTPClient
 	collectionExecutor *collections.CollectionExecutor
-	variableResolver *core.VariableResolver
-	config           *Config
+	variableResolver   *core.VariableResolver
+	config             *Config
 }
 
 const globalEnvName = "global"
@@ -40,7 +40,7 @@ const globalEnvName = "global"
 // log storage, HTTP client, and variable resolver.
 func NewClient(basePath string) (*Client, error) {
 	var (
-		client Client
+		client    Client
 		globalEnv = environment.NewEnvironment(globalEnvName)
 	)
 
@@ -144,7 +144,7 @@ func (c *Client) LoadGlobalEnvironment() error {
 // SaveEnvironments saves both local and global environments to storage.
 func (c *Client) SaveEnvironments() error {
 	var (
-		localEnv = c.variableResolver.GetLocal()
+		localEnv  = c.variableResolver.GetLocal()
 		globalEnv = c.variableResolver.GetGlobal()
 	)
 
@@ -169,27 +169,23 @@ func (c *Client) SaveEnvironments() error {
 	return nil
 }
 
-// SaveEnvironment saves the given environment to storage.
+// SaveEnvironment saves the given environment to storage and makes it the active local environment.
 func (c *Client) SaveEnvironment(env *Environment) error {
 	if env == nil {
 		return fmt.Errorf("%w: 'env' is nil", ErrInvalidArgument)
 	}
 
-	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", env.Name))
-	err := env.Save(filePath)
-
-	if err != nil {
+	if err := c.saveEnvironmentFile(env); err != nil {
 		return err
 	}
 
-	// globalFilePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", c.globalEnv.Name))
-	// err = c.globalEnv.Save(globalFilePath)
-	//
-	// if err != nil {
-	// 	return err
-	// }
-
+	c.variableResolver.SetLocal(env)
 	return nil
+}
+
+func (c *Client) saveEnvironmentFile(env *Environment) error {
+	filePath := filepath.Join(c.storage.EnvironmentsDir(), fmt.Sprintf("%s.json", env.Name))
+	return env.Save(filePath)
 }
 
 // ListEnvironments returns a list of all available environment names.
@@ -234,12 +230,13 @@ func (c *Client) GetCurrentEnvironment() *environment.Environment {
 	return c.variableResolver.GetLocal()
 }
 
-// SetGlobalVariable sets a variable in the global environment.
+// SetGlobalVariable sets a variable in the global environment and persists it.
 func (c *Client) SetGlobalVariable(key, value string) {
 	env := c.variableResolver.GetGlobal()
 
 	if env != nil {
 		env.Set(key, value)
+		_ = c.saveEnvironmentFile(env)
 	}
 }
 

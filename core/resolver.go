@@ -48,17 +48,7 @@ func (vr *VariableResolver) Resolve(template string) (string, error) {
 		}
 
 		varName := strings.TrimSpace(match[1])
-		var (
-			value string
-			ok    bool
-		)
-
-		if vr.local != nil {
-			value, ok = vr.local.Get(varName)
-
-		} else {
-			value, ok = vr.global.Get(varName)
-		}
+		value, ok := vr.lookup(varName)
 
 		if !ok {
 			return "", fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
@@ -68,6 +58,23 @@ func (vr *VariableResolver) Resolve(template string) (string, error) {
 	}
 
 	return result, nil
+}
+
+// lookup returns a variable value using local environment priority over global.
+func (vr *VariableResolver) lookup(varName string) (string, bool) {
+	if vr.local != nil {
+		if value, ok := vr.local.Get(varName); ok {
+			return value, true
+		}
+	}
+
+	if vr.global != nil {
+		if value, ok := vr.global.Get(varName); ok {
+			return value, true
+		}
+	}
+
+	return "", false
 }
 
 // ResolveMap resolves variables in both keys and values of a map.
@@ -128,16 +135,7 @@ func (vr *VariableResolver) ValidateVariables(template string) error {
 
 		varName := strings.TrimSpace(match[1])
 
-		var ok bool
-
-		if vr.local != nil {
-			_, ok = vr.local.Get(varName)
-
-		} else {
-			_, ok = vr.global.Get(varName)
-		}
-
-		if !ok {
+		if _, ok := vr.lookup(varName); !ok {
 			return fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
 		}
 	}
