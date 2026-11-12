@@ -4,7 +4,6 @@ Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor
 package getman
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -369,18 +368,13 @@ func (c *Client) ImportFromPostman(filePath string) (*collections.Collection, er
 	return importer.ImportFromPostman(filePath)
 }
 
-// ExportToPostman exports a collection to a Postman-compatible JSON file.
+// ExportToPostman exports a collection to a Postman Collection v2.1 JSON file.
 func (c *Client) ExportToPostman(collection *collections.Collection, filePath string) error {
-	data, err := json.MarshalIndent(collection, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal collection: %w", err)
+	if collection == nil {
+		return fmt.Errorf("%w: 'collection' is nil", ErrInvalidArgument)
 	}
 
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write Postman collection file: %w", err)
-	}
-
-	return nil
+	return importer.ExportToPostman(collection, filePath)
 }
 
 // ExecuteRequest executes a single HTTP request and returns the execution result.

@@ -33,31 +33,43 @@ func NewVariableResolver(global, local *environment.Environment) (*VariableResol
 var variablePattern = regexp.MustCompile(`\{\{([^}]+)\}\}`)
 
 // Resolve resolves variables in a template string using the current environment.
+// Variables are resolved recursively, so values may reference other variables.
 func (vr *VariableResolver) Resolve(template string) (string, error) {
-	matches := variablePattern.FindAllStringSubmatch(template, -1)
-
-	if matches == nil {
-		return template, nil
-	}
+	const maxDepth = 100
 
 	result := template
+	seen := make(map[string]struct{})
 
-	for _, match := range matches {
-		if len(match) < 2 {
-			continue
+	for depth := 0; ; depth++ {
+		if depth >= maxDepth {
+			return "", fmt.Errorf("%w: circular variable reference", errors.ErrInvalidArgument)
 		}
 
-		varName := strings.TrimSpace(match[1])
-		value, ok := vr.lookup(varName)
-
-		if !ok {
-			return "", fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
+		matches := variablePattern.FindAllStringSubmatch(result, -1)
+		if len(matches) == 0 {
+			return result, nil
 		}
 
-		result = strings.ReplaceAll(result, match[0], value)
+		for _, match := range matches {
+			if len(match) < 2 {
+				continue
+			}
+
+			varName := strings.TrimSpace(match[1])
+			value, ok := vr.lookup(varName)
+			if !ok {
+				return "", fmt.Errorf("%w: %s", errors.ErrVariableNotFound, varName)
+			}
+
+			result = strings.ReplaceAll(result, match[0], value)
+		}
+
+		if _, ok := seen[result]; ok {
+			return "", fmt.Errorf("%w: circular variable reference", errors.ErrInvalidArgument)
+		}
+
+		seen[result] = struct{}{}
 	}
-
-	return result, nil
 }
 
 // lookup returns a variable value using local environment priority over global.

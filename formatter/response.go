@@ -1,12 +1,13 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package formatter
 
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/KonnorFrik/getman/types"
@@ -17,7 +18,7 @@ import (
 func FormatResponse(resp *types.Response) string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("Status: %d %s\n", resp.StatusCode, resp.Status))
+	sb.WriteString(fmt.Sprintf("Status: %d %s\n", resp.StatusCode, statusText(resp)))
 	sb.WriteString(fmt.Sprintf("Duration: %v\n", resp.Duration))
 	sb.WriteString(fmt.Sprintf("Size: %d bytes\n", resp.Size))
 
@@ -67,7 +68,7 @@ func PrintResponse(resp *types.Response) {
 		statusColor = color.New(color.FgMagenta)
 	}
 
-	statusColor.Printf("Status: %d %s\n", resp.StatusCode, resp.Status)
+	statusColor.Printf("Status: %d %s\n", resp.StatusCode, statusText(resp))
 	fmt.Printf("Duration: %v\n", resp.Duration)
 	fmt.Printf("Size: %d bytes\n", resp.Size)
 
@@ -98,6 +99,24 @@ func PrintResponse(resp *types.Response) {
 		}
 		fmt.Println(bodyStr)
 	}
+}
+
+func statusText(resp *types.Response) string {
+	status := strings.TrimSpace(resp.Status)
+	if status == "" {
+		return http.StatusText(resp.StatusCode)
+	}
+
+	prefix := strconv.Itoa(resp.StatusCode)
+	if status == prefix {
+		return http.StatusText(resp.StatusCode)
+	}
+
+	if strings.HasPrefix(status, prefix+" ") {
+		return strings.TrimSpace(strings.TrimPrefix(status, prefix))
+	}
+
+	return status
 }
 
 func isJSON(data []byte) bool {

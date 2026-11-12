@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package storage
 
@@ -10,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"time"
 
 	"github.com/KonnorFrik/getman/errors"
 	"github.com/KonnorFrik/getman/types"
@@ -28,20 +26,14 @@ func NewHistoryStorage(fileStorage *FileStorage) *HistoryStorage {
 	}
 }
 
-// Save saves an execution result to a timestamped JSON file. If the file exists, it will be overwritten.
+// Save saves an execution result to a timestamped JSON file.
 func (hs *HistoryStorage) Save(result *types.ExecutionResult) error {
-	timestamp := FormatTimestamp(time.Now())
-	filename := fmt.Sprintf("%s.json", timestamp)
-
-	dir := hs.fileStorage.HistoryDir()
-	filePath := filepath.Join(dir, filename)
 	data, err := json.MarshalIndent(result, "", "  ")
-
 	if err != nil {
 		return fmt.Errorf("failed to marshal execution result: %w", err)
 	}
 
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	if err := writeTimestampedFile(hs.fileStorage.HistoryDir(), data); err != nil {
 		return fmt.Errorf("%w: failed to write history file: %w", errors.ErrStorageError, err)
 	}
 
