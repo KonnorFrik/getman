@@ -108,6 +108,12 @@ func (fs *FileStorage) ConfigPath() string {
 	return filepath.Join(fs.basePath, fileName)
 }
 
+// PlaceholdersPath returns the path to the path placeholders file.
+func (fs *FileStorage) PlaceholdersPath() string {
+	const fileName = "placeholders.json"
+	return filepath.Join(fs.basePath, fileName)
+}
+
 var timestampedWriteMu sync.Mutex
 
 // writeTimestampedFile writes data to a new file in dir using the current time as

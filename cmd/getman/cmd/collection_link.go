@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -12,9 +11,9 @@ import (
 var linkCmd = &cobra.Command{
 	Use:   "link <collection_name> <env_name>",
 	Short: "Set new env for collection",
-	Long: ``,
-	Args: cobra.ExactArgs(2),
-	Run: _CollectionLinkCmd,
+	Long:  ``,
+	Args:  cobra.ExactArgs(2),
+	Run:   _CollectionLinkCmd,
 }
 
 func _CollectionLinkCmd(cmd *cobra.Command, args []string) {
@@ -26,7 +25,7 @@ func _CollectionLinkCmd(cmd *cobra.Command, args []string) {
 	}
 
 	var (
-		collectionName = args[0]
+		collectionName  = args[0]
 		environmentName = args[1]
 	)
 
@@ -34,16 +33,16 @@ func _CollectionLinkCmd(cmd *cobra.Command, args []string) {
 
 	if err != nil {
 		if flagExitOnError {
-			PrintfError("Can't find environment: %s\n", flagCollectionEnvName)
+			PrintfError("Can't find environment: %s\n", environmentName)
 			PrintfError("Exit on error\n")
 			return
 		}
 
-		err = createEnvInStorage(client, flagCollectionEnvName)
+		err = createEnvInStorage(client, environmentName)
 
 		if err != nil {
 			if flagExitOnError {
-				PrintfError("Can't find and create environment: %s: %s\n", flagCollectionEnvName, err)
+				PrintfError("Can't find and create environment: %s: %s\n", environmentName, err)
 				PrintfError("Exit on error\n")
 				return
 			}
@@ -67,7 +66,7 @@ func _CollectionLinkCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(linkCmd)
+	collectionCmd.AddCommand(linkCmd)
 
 	// Here you will define your flags and configuration settings.
 

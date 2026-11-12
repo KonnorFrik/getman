@@ -111,3 +111,38 @@ func TestExportToPostman_InvalidCollection(t *testing.T) {
 		t.Fatal("expected error for nil collection")
 	}
 }
+
+func TestImportFromPostman_PathPlaceholderFromPathBlock(t *testing.T) {
+	dir := t.TempDir()
+	filePath := filepath.Join(dir, "postman.json")
+
+	data := `{
+		"info": {"name": "Path Placeholder Test"},
+		"item": [{
+			"name": "Get Order",
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "http://example.com/orders",
+					"protocol": "http",
+					"host": ["example", "com"],
+					"path": ["orders", ":orderId"]
+				}
+			}
+		}]
+	}`
+
+	if err := os.WriteFile(filePath, []byte(data), 0644); err != nil {
+		t.Fatalf("failed to write file: %v", err)
+	}
+
+	collection, err := ImportFromPostman(filePath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "http://example.com/orders/:orderId"
+	if got := collection.Items[0].Request.URL; got != expected {
+		t.Errorf("expected URL %q, got %q", expected, got)
+	}
+}

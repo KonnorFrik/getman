@@ -22,4 +22,6 @@ var (
 	ErrStorageError = errors.New("storage error")
 	// ErrInvalidArgument is returned when an invalid argument is provided.
 	ErrInvalidArgument = errors.New("invalid argument")
+	// ErrPlaceholderNotFound is returned when a path placeholder is missing or empty.
+	ErrPlaceholderNotFound = errors.New("path placeholder not found")
 )

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -15,9 +14,9 @@ import (
 var envSetCmd = &cobra.Command{
 	Use:   "set <env> <key=value> ...<key=value>",
 	Short: "Set pair key-value into specified environment",
-	Long: `Must be at least one key-value pair`,
-	Args: cobra.MinimumNArgs(2),
-	Run: _EnvSetCmd,
+	Long:  `Must be at least one key-value pair`,
+	Args:  cobra.MinimumNArgs(2),
+	Run:   _EnvSetCmd,
 }
 
 func _EnvSetCmd(cmd *cobra.Command, args []string) {
@@ -40,25 +39,25 @@ func _EnvSetCmd(cmd *cobra.Command, args []string) {
 	env := client.GetCurrentEnvironment()
 
 	var (
-		added int
+		added      int
 		overwrited int
 	)
 
 	for ind, pair := range args[1:] {
 		if !strings.Contains(pair, "=") {
-			PrintfError("pair #%d - %s must contain '='\n", ind + 1, pair)
+			PrintfError("pair #%d - %s must contain '='\n", ind+1, pair)
 			continue
 		}
 
-		parts := strings.Split(pair, "=")
+		parts := strings.SplitN(pair, "=", 2)
 
 		if len(parts) != 2 {
-			PrintfError("pair #%d - %s must contain exactly one '='\n", ind + 1, pair)
+			PrintfError("pair #%d - %s must contain '='\n", ind+1, pair)
 			continue
 		}
 
-		_, exist := env.Variables[parts[0]]
-		env.Variables[parts[0]] = parts[1]
+		_, exist := env.Get(parts[0])
+		env.Set(parts[0], parts[1])
 
 		if exist {
 			overwrited++
@@ -75,7 +74,7 @@ func _EnvSetCmd(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("Into %s: Added %d, Overwrited: %d, Summary: %d\n", env.Name, added, overwrited, added + overwrited)
+	fmt.Printf("Into %s: Added %d, Overwritten: %d, Summary: %d\n", env.Name, added, overwrited, added+overwrited)
 }
 
 func init() {

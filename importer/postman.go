@@ -366,7 +366,11 @@ func convertPostmanRequest(postmanReq *PostmanRequest) *types.Request {
 }
 
 func postmanURLString(postmanURL PostmanURL) string {
-	if postmanURL.Raw != "" {
+	if postmanURL.Raw != "" && !hasMissingPathPlaceholders(postmanURL) {
+		return postmanURL.Raw
+	}
+
+	if postmanURL.Raw != "" && len(postmanURL.Host) == 0 && postmanURL.Protocol == "" {
 		return postmanURL.Raw
 	}
 
@@ -389,6 +393,16 @@ func postmanURLString(postmanURL PostmanURL) string {
 	}
 
 	return raw
+}
+
+func hasMissingPathPlaceholders(postmanURL PostmanURL) bool {
+	for _, segment := range postmanURL.Path {
+		if strings.HasPrefix(segment, ":") && !strings.Contains(postmanURL.Raw, segment) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func convertPostmanBody(postmanBody *PostmanBody, contentType string) *types.RequestBody {

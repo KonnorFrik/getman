@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -13,9 +12,9 @@ import (
 var envUnsetCmd = &cobra.Command{
 	Use:   "unset <env> <key> ...<key>",
 	Short: "Delete a pair key-value from environment",
-	Long: ``,
-	Args: cobra.MinimumNArgs(2),
-	Run: _EnvUnsetCmd,
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(2),
+	Run:   _EnvUnsetCmd,
 }
 
 func _EnvUnsetCmd(cmd *cobra.Command, args []string) {
@@ -39,13 +38,11 @@ func _EnvUnsetCmd(cmd *cobra.Command, args []string) {
 	var deleted int
 
 	for _, key := range args[1:] {
-		_, exist := env.Variables[key]
-
-		if !exist {
+		if _, exist := env.Get(key); !exist {
 			continue
 		}
 
-		delete(env.Variables, key)
+		env.Delete(key)
 		deleted++
 	}
 

@@ -14,9 +14,9 @@ import (
 var reqInfoCmd = &cobra.Command{
 	Use:   "info <collection> <request name> ...<request name>",
 	Short: "Show information about request.",
-	Long: `For show info for all requests - don't specify any reqeust's name`,
-	Args: cobra.MinimumNArgs(1),
-	Run: _ReqInfoCmd,
+	Long:  `For show info for all requests - don't specify any reqeust's name`,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _ReqInfoCmd,
 }
 
 func _ReqInfoCmd(cmd *cobra.Command, args []string) {
@@ -90,9 +90,22 @@ func printRequestInfo(req *types.RequestItem) {
 		}
 	}
 
-	if req.Request.Timeout != nil {
-		fmt.Printf("Timeout connect: %s\n", req.Request.Timeout.Connect)
-		fmt.Printf("Timeout read: %s\n", req.Request.Timeout.Read)
+	if req.Request.Body != nil {
+		fmt.Printf("\tBody (%s, %s):\n", req.Request.Body.Type, req.Request.Body.ContentType)
+		fmt.Printf("\t\t%s\n", string(req.Request.Body.Content))
 	}
-	// TODO: add more info
+
+	if req.Request.Auth != nil {
+		fmt.Printf("\tAuth:\n")
+		fmt.Printf("\t\tType: %s\n", req.Request.Auth.Type)
+	}
+
+	if req.Request.Timeout != nil {
+		fmt.Printf("\tTimeout connect: %s\n", req.Request.Timeout.Connect)
+		fmt.Printf("\tTimeout read: %s\n", req.Request.Timeout.Read)
+	}
+
+	if req.Request.Cookies != nil {
+		fmt.Printf("\tCookies auto manage: %t\n", req.Request.Cookies.AutoManage)
+	}
 }

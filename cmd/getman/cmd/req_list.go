@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -13,9 +12,9 @@ import (
 var reqListCmd = &cobra.Command{
 	Use:   "list <collection> ...<collection>",
 	Short: "List all requests from collection",
-	Long: ``,
-	Args: cobra.MinimumNArgs(1),
-	Run: _ReqListCmd,
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _ReqListCmd,
 }
 
 func _ReqListCmd(cmd *cobra.Command, args []string) {
@@ -45,7 +44,7 @@ func _ReqListCmd(cmd *cobra.Command, args []string) {
 			fmt.Printf("\t%d: %s -> %s %s\n", ind, req.Name, req.Request.Method, req.Request.URL)
 		}
 
-		println()
+		fmt.Println()
 	}
 }
 

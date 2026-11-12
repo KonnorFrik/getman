@@ -1,11 +1,12 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"sort"
+
 	"github.com/spf13/cobra"
 )
 
@@ -13,9 +14,9 @@ import (
 var varsCmd = &cobra.Command{
 	Use:   "vars <env> ...<env>",
 	Short: "show all variables stored in specified environment",
-	Long: ``,
-	Args: cobra.MinimumNArgs(1),
-	Run: _EnvVarsCmd,
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _EnvVarsCmd,
 }
 
 func _EnvVarsCmd(cmd *cobra.Command, args []string) {
@@ -43,8 +44,14 @@ func _EnvVarsCmd(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		for k, v := range env.Variables {
-			fmt.Printf("\t%s=%s\n", k, v)
+		keys := make([]string, 0, len(env.Variables))
+		for k := range env.Variables {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			fmt.Printf("\t%s=%s\n", k, env.Variables[k])
 		}
 
 		println()

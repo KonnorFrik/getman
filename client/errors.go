@@ -14,4 +14,5 @@ var (
 	ErrRequestFailed       = errors.ErrRequestFailed
 	ErrStorageError        = errors.ErrStorageError
 	ErrInvalidArgument     = errors.ErrInvalidArgument
+	ErrPlaceholderNotFound = errors.ErrPlaceholderNotFound
 )

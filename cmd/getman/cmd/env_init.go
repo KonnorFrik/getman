@@ -4,6 +4,8 @@ Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor
 package cmd
 
 import (
+	"fmt"
+
 	getman "github.com/KonnorFrik/getman/client"
 	"github.com/spf13/cobra"
 )
@@ -49,11 +51,14 @@ func init() {
 }
 
 func createEnvInStorage(cl *getman.Client, envName string) error {
-	env := &getman.Environment{
-		Name: envName,
+	if err := cl.LoadLocalEnvironment(envName); err == nil {
+		return fmt.Errorf("environment %q already exists", envName)
 	}
 
-	err := cl.SaveEnvironment(env)
+	env := &getman.Environment{
+		Name:      envName,
+		Variables: make(map[string]string),
+	}
 
-	return err
+	return cl.SaveEnvironment(env)
 }

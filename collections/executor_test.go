@@ -766,9 +766,12 @@ func TestUnitExecuteCollectionAsync_EmptyCollection(t *testing.T) {
 	ch := executor.ExecuteCollectionAsync(collection, "test")
 
 	select {
-	case execution := <-ch:
-		t.Errorf("unexpected execution received: %+v", execution)
+	case execution, ok := <-ch:
+		if ok {
+			t.Errorf("unexpected execution received: %+v", execution)
+		}
 	case <-time.After(100 * time.Millisecond):
+		t.Fatal("expected channel to be closed")
 	}
 }
 

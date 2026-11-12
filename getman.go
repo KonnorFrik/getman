@@ -52,6 +52,7 @@ var (
 	ErrRequestFailed       = client.ErrRequestFailed
 	ErrStorageError        = client.ErrStorageError
 	ErrInvalidArgument     = client.ErrInvalidArgument
+	ErrPlaceholderNotFound = client.ErrPlaceholderNotFound
 )
 
 // NewClient creates a new Client instance with the specified base path for storage.

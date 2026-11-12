@@ -64,7 +64,7 @@ func _ReqNewCmd(cmd *cobra.Command, args []string) {
 	reqBuilder = reqBuilder.URL(flagReqBuilderUrl)
 
 	for ind, hdr := range flagReqBuilderHeader {
-		parts := strings.Split(hdr, ":")
+		parts := strings.SplitN(hdr, ":", 2)
 
 		if len(parts) != 2 {
 			PrintfError("Header #%d: '%s': invalid syntax\n", ind, hdr)
@@ -97,7 +97,7 @@ func _ReqNewCmd(cmd *cobra.Command, args []string) {
 		content, err := readFileAsBytes(flagReqBuilderBodyBinary)
 
 		if err != nil {
-			PrintfError("Can't read file: %s: %s\n", flagReqBuilderBodyFile, err)
+			PrintfError("Can't read file: %s: %s\n", flagReqBuilderBodyBinary, err)
 			return
 		}
 
@@ -106,7 +106,7 @@ func _ReqNewCmd(cmd *cobra.Command, args []string) {
 
 	// TODO: add priority or exluding flags if one already setted
 	if flagReqBuilderAuthBasic != "" {
-		parts := strings.Split(flagReqBuilderAuthBasic, ":")
+		parts := strings.SplitN(flagReqBuilderAuthBasic, ":", 2)
 
 		if len(parts) != 2 {
 			PrintfError("BasicAuth '%s': invalid syntax\n", flagReqBuilderAuthBasic)

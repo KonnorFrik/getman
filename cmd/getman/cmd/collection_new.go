@@ -72,7 +72,7 @@ var (
 
 func init() {
 	// TODO: add flag for collection: description, env
-	rootCmd.AddCommand(newCmd)
+	collectionCmd.AddCommand(newCmd)
 
 	// Here you will define your flags and configuration settings.
 

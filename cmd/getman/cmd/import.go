@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -19,7 +18,7 @@ If a collection with the same name already exists, it will be overwritten !
 Can import from:
 - Postman json`,
 	Args: cobra.MinimumNArgs(1),
-	Run: _ImportCmd,
+	Run:  _ImportCmd,
 }
 
 var (
@@ -64,6 +63,8 @@ func _ImportCmd(cmd *cobra.Command, args []string) {
 				fmt.Printf("Exit on error.")
 				return
 			}
+
+			continue
 		}
 
 		imported++
@@ -89,4 +90,3 @@ func init() {
 	// is called directly, e.g.:
 	// importCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-

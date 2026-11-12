@@ -18,9 +18,9 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Print all collection names.",
-	Long: `Print all names of collections stored in getman directory.`,
-	Args: cobra.NoArgs,
-	Run: _ListCmd,
+	Long:  `Print all names of collections stored in getman directory.`,
+	Args:  cobra.NoArgs,
+	Run:   _ListCmd,
 }
 
 func _ListCmd(cmd *cobra.Command, args []string) {
@@ -50,7 +50,7 @@ func _ListCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	collectionCmd.AddCommand(listCmd)
 
 	// Here you will define your flags and configuration settings.
 

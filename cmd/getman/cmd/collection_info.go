@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -14,9 +13,9 @@ import (
 var collectionInfoCmd = &cobra.Command{
 	Use:   "info <collection> ...<collection>",
 	Short: "Show info about collection",
-	Long: ``,
-	Args: cobra.MinimumNArgs(1),
-	Run: _CollectionInfoCmd,
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(1),
+	Run:   _CollectionInfoCmd,
 }
 
 func _CollectionInfoCmd(cmd *cobra.Command, args []string) {
@@ -27,8 +26,6 @@ func _CollectionInfoCmd(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	methodCounter := make(map[string]int)
-
 	for _, name := range args {
 		coll, err := client.LoadCollection(name)
 
@@ -36,6 +33,8 @@ func _CollectionInfoCmd(cmd *cobra.Command, args []string) {
 			PrintfError("Can't load collection %q: %s\n", name, err)
 			continue
 		}
+
+		methodCounter := make(map[string]int)
 
 		for _, req := range coll.Items {
 			methodCounter[req.Request.Method]++
@@ -55,7 +54,7 @@ func _CollectionInfoCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(collectionInfoCmd)
+	collectionCmd.AddCommand(collectionInfoCmd)
 
 	// Here you will define your flags and configuration settings.
 

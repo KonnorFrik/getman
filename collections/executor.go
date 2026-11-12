@@ -11,10 +11,14 @@ import (
 	"github.com/KonnorFrik/getman/types"
 )
 
+// PathResolverFunc resolves path placeholders in a URL.
+type PathResolverFunc func(string) (string, error)
+
 // CollectionExecutor executes collections of HTTP requests.
 type CollectionExecutor struct {
 	httpClient       *core.HTTPClient
 	variableResolver *core.VariableResolver
+	pathResolver     PathResolverFunc
 }
 
 // NewCollectionExecutor creates a new CollectionExecutor instance.
@@ -25,6 +29,11 @@ func NewCollectionExecutor(httpClient *core.HTTPClient, variableResolver *core.V
 	}
 }
 
+// SetPathResolver sets an optional resolver for path placeholders.
+func (ce *CollectionExecutor) SetPathResolver(resolver PathResolverFunc) {
+	ce.pathResolver = resolver
+}
+
 // ExecuteCollection executes all requests in a collection.
 func (ce *CollectionExecutor) ExecuteCollection(collection *Collection, environment string) (*types.ExecutionResult, error) {
 	return ce.ExecuteCollectionSelective(collection, environment, nil)
@@ -33,11 +42,13 @@ func (ce *CollectionExecutor) ExecuteCollection(collection *Collection, environm
 // ExecuteCollectionAsync executes all requests in a collection asynchronously.
 // It returns a channel that receives RequestExecution results as they complete.
 // The channel is buffered with capacity 1. Results are sent in the order requests are processed.
-// Note: The channel is not closed automatically after all requests complete.
+// The channel is closed after all requests complete.
 func (ce *CollectionExecutor) ExecuteCollectionAsync(collection *Collection, environment string) <-chan *types.RequestExecution {
 	ch := make(chan *types.RequestExecution, 1)
 
 	go func() {
+		defer close(ch)
+
 		itemsToExecute := collection.Items
 
 		for _, item := range itemsToExecute {
@@ -192,6 +203,13 @@ func (ce *CollectionExecutor) resolveRequest(req *types.Request) (*types.Request
 	resolvedURL, err := ce.variableResolver.Resolve(req.URL)
 	if err != nil {
 		return nil, err
+	}
+
+	if ce.pathResolver != nil {
+		resolvedURL, err = ce.pathResolver(resolvedURL)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	resolvedHeaders, err := ce.variableResolver.ResolveMap(req.Headers)

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -12,7 +11,7 @@ import (
 var envCmd = &cobra.Command{
 	Use:   "env",
 	Short: "Work with environments",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }

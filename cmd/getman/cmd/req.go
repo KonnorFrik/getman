@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -12,7 +11,7 @@ import (
 var reqCmd = &cobra.Command{
 	Use:   "req",
 	Short: "Work with requests",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Шелковский Сергей (Shelkovskiy Sergey) <konnor.frik666@gmail.com>
-
 */
 package cmd
 
@@ -13,8 +12,8 @@ import (
 var envListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list all environments",
-	Long: ``,
-	Run: _EnvListCmd,
+	Long:  ``,
+	Run:   _EnvListCmd,
 }
 
 func _EnvListCmd(cmd *cobra.Command, args []string) {

@@ -30,6 +30,7 @@ type Client struct {
 	httpClient         *core.HTTPClient
 	collectionExecutor *collections.CollectionExecutor
 	variableResolver   *core.VariableResolver
+	placeholders       *environment.PlaceholderStore
 	config             *Config
 }
 
@@ -85,6 +86,9 @@ func newClient(fileStorage *storage.FileStorage, config *Config) (*Client, error
 		config.Defaults.Cookies.AutoManage,
 	)
 
+	placeholderStore := environment.NewPlaceholderStore(fileStorage.PlaceholdersPath())
+	_ = placeholderStore.Load()
+
 	client := &Client{
 		storage:            fileStorage,
 		historyStorage:     storage.NewHistoryStorage(fileStorage),
@@ -92,9 +96,11 @@ func newClient(fileStorage *storage.FileStorage, config *Config) (*Client, error
 		httpClient:         httpClient,
 		collectionExecutor: collections.NewCollectionExecutor(httpClient, variableResolver),
 		variableResolver:   variableResolver,
+		placeholders:       placeholderStore,
 		config:             config,
 	}
 
+	client.collectionExecutor.SetPathResolver(client.resolvePathPlaceholders)
 	_ = client.LoadGlobalEnvironment()
 
 	return client, nil
@@ -322,13 +328,35 @@ func (c *Client) LoadCollection(name string) (*collections.Collection, error) {
 }
 
 // SaveCollection saves a collection to storage.
+// Path placeholders found in request URLs are registered in placeholders storage.
 func (c *Client) SaveCollection(collection *collections.Collection) error {
 	if collection == nil {
 		return fmt.Errorf("%w: 'collection' is nil", ErrInvalidArgument)
 	}
 
 	filePath := collections.GetCollectionPath(c.storage, collection.Name)
-	return collections.SaveCollectionToFile(collection, filePath)
+	if err := collections.SaveCollectionToFile(collection, filePath); err != nil {
+		return err
+	}
+
+	foundPlaceholders := false
+
+	for _, item := range collection.Items {
+		if item == nil || item.Request == nil {
+			continue
+		}
+
+		for _, name := range environment.ExtractPathPlaceholders(item.Request.URL) {
+			c.placeholders.Ensure(name)
+			foundPlaceholders = true
+		}
+	}
+
+	if foundPlaceholders {
+		return c.placeholders.Save()
+	}
+
+	return nil
 }
 
 // ListCollections returns a list of all available collection names.
@@ -364,8 +392,33 @@ func (c *Client) DeleteCollection(name string) error {
 }
 
 // ImportFromPostman imports a Postman collection from the specified file path.
+// Path placeholders found in imported requests are registered in placeholders storage.
 func (c *Client) ImportFromPostman(filePath string) (*collections.Collection, error) {
-	return importer.ImportFromPostman(filePath)
+	collection, err := importer.ImportFromPostman(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	foundPlaceholders := false
+
+	for _, item := range collection.Items {
+		if item == nil || item.Request == nil {
+			continue
+		}
+
+		for _, name := range environment.ExtractPathPlaceholders(item.Request.URL) {
+			c.placeholders.Ensure(name)
+			foundPlaceholders = true
+		}
+	}
+
+	if foundPlaceholders {
+		if err := c.placeholders.Save(); err != nil {
+			return collection, err
+		}
+	}
+
+	return collection, nil
 }
 
 // ExportToPostman exports a collection to a Postman Collection v2.1 JSON file.
@@ -375,6 +428,37 @@ func (c *Client) ExportToPostman(collection *collections.Collection, filePath st
 	}
 
 	return importer.ExportToPostman(collection, filePath)
+}
+
+// SetPlaceholder sets a path placeholder value and persists it.
+func (c *Client) SetPlaceholder(key, value string) error {
+	c.placeholders.Set(key, value)
+	return c.placeholders.Save()
+}
+
+// GetPlaceholder returns a path placeholder value.
+func (c *Client) GetPlaceholder(key string) (string, bool) {
+	return c.placeholders.Get(key)
+}
+
+// DeletePlaceholder removes a path placeholder and persists the change.
+func (c *Client) DeletePlaceholder(key string) error {
+	c.placeholders.Delete(key)
+	return c.placeholders.Save()
+}
+
+// ListPlaceholders returns a copy of all path placeholders.
+func (c *Client) ListPlaceholders() map[string]string {
+	return c.placeholders.Values()
+}
+
+// ResolvePathPlaceholders replaces path placeholders in a URL with stored values.
+func (c *Client) ResolvePathPlaceholders(rawURL string) (string, error) {
+	return c.placeholders.ResolvePath(rawURL)
+}
+
+func (c *Client) resolvePathPlaceholders(rawURL string) (string, error) {
+	return c.placeholders.ResolvePath(rawURL)
 }
 
 // ExecuteRequest executes a single HTTP request and returns the execution result.
@@ -539,6 +623,11 @@ func (c *Client) UpdateConfig(config *Config) error {
 
 func (c *Client) resolveRequest(req *types.Request) (*types.Request, error) {
 	resolvedURL, err := c.variableResolver.Resolve(req.URL)
+	if err != nil {
+		return nil, err
+	}
+
+	resolvedURL, err = c.placeholders.ResolvePath(resolvedURL)
 	if err != nil {
 		return nil, err
 	}

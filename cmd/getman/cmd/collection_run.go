@@ -45,7 +45,7 @@ func _RunCmd(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
+	collectionCmd.AddCommand(runCmd)
 
 	// Here you will define your flags and configuration settings.
 
